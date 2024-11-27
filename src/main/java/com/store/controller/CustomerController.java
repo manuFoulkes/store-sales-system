@@ -2,6 +2,7 @@ package com.store.controller;
 
 import com.store.dto.customer.CustomerRequestDTO;
 import com.store.dto.customer.CustomerResponseDTO;
+import com.store.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,4 +17,15 @@ import java.util.List;
 @RequestMapping("/customers")
 public class CustomerController {
 
+    private final CustomerService customerService;
+
+    @Autowired
+    public CustomerController(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerResponseDTO> getById(@PathVariable Long id) {
+        return new ResponseEntity<>(customerService.getCustomerById(id), HttpStatus.FOUND);
+    }
 }
