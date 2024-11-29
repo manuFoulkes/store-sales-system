@@ -1,5 +1,6 @@
 package com.store.service;
 
+import com.store.dto.customer.CustomerRequestDTO;
 import com.store.entity.Customer;
 import com.store.dto.customer.CustomerResponseDTO;
 import com.store.exception.CustomerNotFoundException;
@@ -53,5 +54,23 @@ public class CustomerService {
         }
 
         return customersResponse;
+    }
+
+    public CustomerResponseDTO createCustomer(CustomerRequestDTO customerRequestDTO) {
+        //TODO: Validate that the user non exists in database
+        Customer customer = new Customer();
+
+        customer.setName(customerRequestDTO.name());
+        customer.setLastName(customerRequestDTO.lastName());
+        customer.setEmail(customerRequestDTO.email());
+
+        customer = customerRepository.save(customer);
+
+        return new CustomerResponseDTO(
+                customer.getId(),
+                customer.getName(),
+                customer.getLastName(),
+                customer.getEmail()
+        );
     }
 }
