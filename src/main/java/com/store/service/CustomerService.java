@@ -2,6 +2,7 @@ package com.store.service;
 
 import com.store.entity.Customer;
 import com.store.dto.customer.CustomerResponseDTO;
+import com.store.exception.CustomerNotFoundException;
 import com.store.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class CustomerService {
 
     public CustomerResponseDTO getCustomerById(Long id) {
         Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer with id " + id + " not found"));
+                .orElseThrow(() -> new CustomerNotFoundException("Customer with id " + id + " not found"));
 
         return new CustomerResponseDTO(
                 customer.getId(),

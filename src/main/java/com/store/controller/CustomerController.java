@@ -24,6 +24,7 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
+    //TODO: Add @Positive annotation after @PathVariable and manage the exception
     @GetMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> getById(@PathVariable Long id) {
         return new ResponseEntity<>(customerService.getCustomerById(id), HttpStatus.FOUND);
