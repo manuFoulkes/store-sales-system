@@ -7,6 +7,9 @@ import com.store.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class CustomerService {
 
@@ -27,5 +30,28 @@ public class CustomerService {
                 customer.getLastName(),
                 customer.getEmail()
         );
+    }
+
+    public List<CustomerResponseDTO> getAllCustomers() {
+        List<Customer> customers = customerRepository.findAll();
+
+        if(customers.isEmpty()) {
+            throw new CustomerNotFoundException("No customers found");
+        }
+
+        List<CustomerResponseDTO> customersResponse = new ArrayList<>();
+
+        for(Customer customer : customers) {
+            CustomerResponseDTO customerResponse = new CustomerResponseDTO(
+                    customer.getId(),
+                    customer.getName(),
+                    customer.getLastName(),
+                    customer.getEmail()
+            );
+
+            customersResponse.add(customerResponse);
+        }
+
+        return customersResponse;
     }
 }
