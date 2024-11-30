@@ -2,7 +2,7 @@ package com.store.service;
 
 import com.store.dto.customer.CustomerResponseDTO;
 import com.store.entity.Customer;
-import com.store.exception.CustomerNotFoundException;
+import com.store.exception.customer.CustomerNotFoundException;
 import com.store.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
