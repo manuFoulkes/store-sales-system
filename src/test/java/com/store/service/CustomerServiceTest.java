@@ -153,4 +153,29 @@ public class CustomerServiceTest {
 
         verify(customerRepository, never()).save(any(Customer.class));
     }
+
+    @Test
+    void deleteCustomer_ShouldSuccess_WhenCustomerExists() {
+        Long existingCustomerId = 1L;
+        Customer existingCustomer = new Customer("John", "Doe", "john.doe@gmail.com");
+
+        when(customerRepository.findById(existingCustomerId)).thenReturn(Optional.of(existingCustomer));
+
+        customerService.deleteCustomer(existingCustomerId);
+
+        verify(customerRepository, times(1)).delete(existingCustomer);
+    }
+
+
+    @Test
+    void deleteCustomer_ShouldThrowAnException_WhenCustomerNotExist() {
+        Long nonExistingCustomerId = 1L;
+
+        when(customerRepository.findById(nonExistingCustomerId)).thenReturn(Optional.empty());
+
+        assertThrows(CustomerNotFoundException.class,
+                () -> customerService.deleteCustomer(nonExistingCustomerId));
+
+        verify(customerRepository, times(1)).findById(nonExistingCustomerId);
+    }
 }

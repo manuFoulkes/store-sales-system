@@ -97,4 +97,11 @@ public class CustomerService {
                 customer.getEmail()
         );
     }
+
+    public void deleteCustomer(Long id) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer with id " + id + " not found"));
+
+        customerRepository.delete(customer);
+    }
 }
