@@ -44,4 +44,12 @@ public class CustomerController {
                 .created(URI.create("/customers/" + createdCustomer.id()))
                 .body(createdCustomer);
     }
+
+    //TODO: Add @Valid annotation in param for validation
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerResponseDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerRequestDTO customerRequest) {
+        CustomerResponseDTO updatedCustomer = customerService.updateCustomer(id, customerRequest);
+
+        return ResponseEntity.ok(updatedCustomer);
+    }
 }

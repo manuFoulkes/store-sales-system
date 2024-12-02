@@ -121,4 +121,36 @@ public class CustomerServiceTest {
 
         verify(customerRepository, never()).save(any(Customer.class));
     }
+
+    @Test
+    void updateCustomer_ShouldSuccess_WhenCustomerExists() {
+        Customer existingCustomer = new Customer("John", "Doe", "john.doe@gmail.com");
+        CustomerRequestDTO customerRequestDTO = new CustomerRequestDTO(
+            "John",
+            "Doe",
+            "john.doe@gmail.com"
+        );
+
+        when(customerRepository.findById(anyLong())).thenReturn(Optional.of(existingCustomer));
+        when(customerRepository.save(existingCustomer)).thenReturn(existingCustomer);
+
+        CustomerResponseDTO updatedCustomer = customerService.updateCustomer(1L, customerRequestDTO);
+
+        assertEquals(updatedCustomer.name(), customerRequestDTO.name());
+        assertEquals(updatedCustomer.lastName(), customerRequestDTO.lastName());
+        assertEquals(updatedCustomer.email(), customerRequestDTO.email());
+    }
+
+    @Test
+    void updateCustomer_ShouldThrowAnException_WhenCustomerNotExist() {
+        Long nonExistingCustomerId = 1L;
+        CustomerRequestDTO customerRequestDTO = new CustomerRequestDTO("John", "Doe", "john.doe@gmail.com");
+
+        when(customerRepository.findById(nonExistingCustomerId)).thenReturn(Optional.empty());
+
+        assertThrows(CustomerNotFoundException.class,
+                () -> customerService.updateCustomer(nonExistingCustomerId, customerRequestDTO));
+
+        verify(customerRepository, never()).save(any(Customer.class));
+    }
 }

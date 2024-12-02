@@ -6,6 +6,7 @@ import com.store.dto.customer.CustomerResponseDTO;
 import com.store.exception.customer.CustomerAlreadyExistsException;
 import com.store.exception.customer.CustomerNotFoundException;
 import com.store.repository.CustomerRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -69,6 +70,25 @@ public class CustomerService {
         customer.setEmail(customerRequestDTO.email());
 
         customer = customerRepository.save(customer);
+
+        return new CustomerResponseDTO(
+                customer.getId(),
+                customer.getName(),
+                customer.getLastName(),
+                customer.getEmail()
+        );
+    }
+
+    @Transactional
+    public CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO customerRequestDTO) {
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException("Customer with id " + id + " not found"));
+
+        customer.setName(customerRequestDTO.name());
+        customer.setLastName(customerRequestDTO.lastName());
+        customer.setEmail(customerRequestDTO.email());
+
+        customerRepository.save(customer);
 
         return new CustomerResponseDTO(
                 customer.getId(),
