@@ -1,8 +1,10 @@
 package com.store.service;
 
+import com.store.dto.customer.CustomerRequestDTO;
 import com.store.dto.customer.CustomerResponseDTO;
 import com.store.entity.Customer;
-import com.store.exception.CustomerNotFoundException;
+import com.store.exception.customer.CustomerAlreadyExistsException;
+import com.store.exception.customer.CustomerNotFoundException;
 import com.store.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,5 +93,32 @@ public class CustomerServiceTest {
         });
 
         verify(customerRepository, times(1)).findAll();
+    }
+
+    @Test
+    void createCustomer_ShouldSuccess_WhenCustomerDoesNotExist() {
+        Customer customer = new Customer("John", "Doe", "john.doe@gmail.com");
+        CustomerRequestDTO customerRequestDTO = new CustomerRequestDTO("John", "Doe", "john.doe@gmail.com");
+
+        when(customerRepository.save(customer)).thenReturn(customer);
+
+        CustomerResponseDTO customerResponseDTO = customerService.createCustomer(customerRequestDTO);
+
+        assertEquals(customer.getName(), customerResponseDTO.name());
+        assertEquals(customer.getLastName(), customerResponseDTO.lastName());
+        assertEquals(customer.getEmail(), customerResponseDTO.email());
+    }
+
+    @Test
+    void createCustomer_ShouldThrowAnException_WhenCustomerExist() {
+        Customer existingCustomer = new Customer("John", "Doe", "john.doe@gmail.com");
+        CustomerRequestDTO customerRequestDTO = new CustomerRequestDTO("John", "Doe", "john.doe@gmail.com");
+
+        when(customerRepository.getCustomerByEmail(customerRequestDTO.email())).thenReturn(Optional.of(existingCustomer));
+
+        assertThrows(CustomerAlreadyExistsException.class,
+                () -> customerService.createCustomer(customerRequestDTO));
+
+        verify(customerRepository, never()).save(any(Customer.class));
     }
 }
