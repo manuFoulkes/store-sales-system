@@ -35,7 +35,7 @@ public class CustomerController {
         return ResponseEntity.ok(customers);
     }
 
-    //TODO: Add @Valid annotation in param
+    //TODO: Add @Valid annotation in param for validation
     @PostMapping
     public ResponseEntity<CustomerResponseDTO> createCustomer(@RequestBody CustomerRequestDTO customerRequestDTO) {
         CustomerResponseDTO createdCustomer = customerService.createCustomer(customerRequestDTO);
