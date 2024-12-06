@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -85,7 +86,7 @@ public class ProductServiceTest {
                 .price(65.0)
                 .stock(23)
                 .build();
-        
+
         productList.add(product1);
         productList.add(product2);
 
@@ -95,5 +96,16 @@ public class ProductServiceTest {
 
         assertEquals(productResponseDTOList.get(0).name(), productList.get(0).getName());
         assertEquals(productResponseDTOList.get(1).name(), productList.get(1).getName());
+    }
+
+    @Test
+    void getAllProducts_ShouldThrowAnException_WhenProductsNotExist() {
+        when(productRepository.findAll()).thenReturn(Collections.emptyList());
+
+        assertThrows(ProductNotFoundException.class, () -> {
+           productService.getAllProducts();
+        });
+
+        verify(productRepository, times(1)).findAll();
     }
 }
