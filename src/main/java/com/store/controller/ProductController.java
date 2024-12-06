@@ -5,10 +5,7 @@ import com.store.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,15 +20,18 @@ public class ProductController {
         this.productService = productService;
     }
 
+    //TODO: Add @Positive annotation after @PathVariable and manage the exception
     @GetMapping("{id}")
-    private ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
+    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
         return new ResponseEntity<>(productService.getProductById(id), HttpStatus.FOUND);
     }
 
     @GetMapping
-    private ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
         List<ProductResponseDTO> productResponseDTOList = productService.getAllProducts();
 
         return ResponseEntity.ok(productResponseDTOList);
     }
+    
+
 }
