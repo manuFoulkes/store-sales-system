@@ -2,6 +2,7 @@ package com.store.service;
 
 import com.store.dto.product.ProductResponseDTO;
 import com.store.entity.Product;
+import com.store.exception.product.ProductNotFoundException;
 import com.store.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
@@ -26,7 +28,7 @@ public class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        
+
     }
 
     @Test
@@ -47,5 +49,18 @@ public class ProductServiceTest {
         assertEquals(productResponseDTO.id(), existingProduct.getId());
         assertEquals(productResponseDTO.name(), existingProduct.getName());
         assertEquals(productResponseDTO.brand(), existingProduct.getBrand());
+    }
+
+    @Test
+    void getCustomerById_ShouldThrowAnException_WhenProductNotExist() {
+        Long nonExistingProductId = 1L;
+
+        when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
+
+        assertThrows(ProductNotFoundException.class, () -> {
+            productService.getProductById(nonExistingProductId);
+        });
+
+        verify(productRepository, times(1)).findById(nonExistingProductId);
     }
 }
