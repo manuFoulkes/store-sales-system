@@ -11,6 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,7 +55,7 @@ public class ProductServiceTest {
     }
 
     @Test
-    void getCustomerById_ShouldThrowAnException_WhenProductNotExist() {
+    void getProductById_ShouldThrowAnException_WhenProductNotExist() {
         Long nonExistingProductId = 1L;
 
         when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
@@ -62,5 +65,47 @@ public class ProductServiceTest {
         });
 
         verify(productRepository, times(1)).findById(nonExistingProductId);
+    }
+
+    @Test
+    void getAllProducts_ShouldReturnAListOfProducts_IfCustomersExist() {
+        List<Product> productList = new ArrayList<>();
+
+        Product product1 = Product.builder()
+                .id(1L)
+                .name("T-Shirt")
+                .brand("Levis")
+                .price(50.0)
+                .stock(20)
+                .build();
+
+        Product product2 = Product.builder()
+                .id(2L)
+                .name("Jean")
+                .brand("Levis")
+                .price(65.0)
+                .stock(23)
+                .build();
+
+        productList.add(product1);
+        productList.add(product2);
+
+        when(productRepository.findAll()).thenReturn(productList);
+
+        List<ProductResponseDTO> productResponseDTOList = productService.getAllProducts();
+
+        assertEquals(productResponseDTOList.get(0).name(), productList.get(0).getName());
+        assertEquals(productResponseDTOList.get(1).name(), productList.get(1).getName());
+    }
+
+    @Test
+    void getAllProducts_ShouldThrowAnException_WhenProductsNotExist() {
+        when(productRepository.findAll()).thenReturn(Collections.emptyList());
+
+        assertThrows(ProductNotFoundException.class, () -> {
+           productService.getAllProducts();
+        });
+
+        verify(productRepository, times(1)).findAll();
     }
 }

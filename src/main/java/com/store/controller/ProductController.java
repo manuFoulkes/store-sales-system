@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/products")
 public class ProductController {
@@ -24,5 +26,12 @@ public class ProductController {
     @GetMapping("{id}")
     private ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
         return new ResponseEntity<>(productService.getProductById(id), HttpStatus.FOUND);
+    }
+
+    @GetMapping
+    private ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+        List<ProductResponseDTO> productResponseDTOList = productService.getAllProducts();
+
+        return ResponseEntity.ok(productResponseDTOList);
     }
 }
