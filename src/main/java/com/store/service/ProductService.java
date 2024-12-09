@@ -3,6 +3,7 @@ package com.store.service;
 import com.store.dto.product.ProductRequestDTO;
 import com.store.dto.product.ProductResponseDTO;
 import com.store.entity.Product;
+import com.store.exception.product.ProductAlreadyExistsException;
 import com.store.exception.product.ProductNotFoundException;
 import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
