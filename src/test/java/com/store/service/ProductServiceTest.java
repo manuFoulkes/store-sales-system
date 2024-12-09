@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -159,5 +160,31 @@ public class ProductServiceTest {
                 productService.createNewProduct(productRequestDTO));
 
         verify(productRepository, never()).save(existingProduct);
+    }
+
+    @Test
+    void updateProduct_ShouldSuccess_WhenProductExists() {
+        Product existingProduct = Product.builder()
+                .name("T-Shirt")
+                .brand("Levis")
+                .price(50.0)
+                .stock(20)
+                .build();
+
+        ProductRequestDTO productRequestDTO = new ProductRequestDTO(
+                "T-Shirt",
+                "Levis",
+                50.0,
+                20
+        );
+
+        when(productRepository.findById(anyLong())).thenReturn(Optional.of(existingProduct));
+        when(productRepository.save(existingProduct)).thenReturn(existingProduct);
+
+        ProductResponseDTO updatedProduct = productService.updateProduct(1L,productRequestDTO);
+
+        assertEquals(updatedProduct.name(), productRequestDTO.name());
+        assertEquals(updatedProduct.brand(), productRequestDTO.brand());
+        assertEquals(updatedProduct.price(), productRequestDTO.price());
     }
 }
