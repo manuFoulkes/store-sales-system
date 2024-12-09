@@ -86,4 +86,24 @@ public class ProductService {
                product.getStock()
        );
     }
+
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " does not exists"));
+
+        product.setName(productRequestDTO.name());
+        product.setBrand(productRequestDTO.brand());
+        product.setPrice(productRequestDTO.price());
+        product.setStock(productRequestDTO.stock());
+
+        product = productRepository.save(product);
+
+        return new ProductResponseDTO(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getPrice(),
+                product.getStock()
+        );
+    }
 }
