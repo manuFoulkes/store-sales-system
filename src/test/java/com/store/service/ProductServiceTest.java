@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Optional.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -61,7 +62,7 @@ public class ProductServiceTest {
     void getProductById_ShouldThrowAnException_WhenProductNotExist() {
         Long nonExistingProductId = 1L;
 
-        when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
+        when(productRepository.findById(nonExistingProductId)).thenReturn(empty());
 
         assertThrows(ProductNotFoundException.class, () -> {
             productService.getProductById(nonExistingProductId);
@@ -187,4 +188,24 @@ public class ProductServiceTest {
         assertEquals(updatedProduct.brand(), productRequestDTO.brand());
         assertEquals(updatedProduct.price(), productRequestDTO.price());
     }
+
+    @Test
+    void updateProduct_ShouldThrowAnException_WhenProductNotExists() {
+        Long nonExistingProductId = 1L;
+        ProductRequestDTO productRequestDTO =  new ProductRequestDTO(
+                "T-Shirt",
+                "Levis",
+                50.0,
+                20
+        );
+
+        when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
+
+        assertThrows(ProductNotFoundException.class, () ->
+                productService.updateProduct(nonExistingProductId, productRequestDTO)
+        );
+
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
 }
