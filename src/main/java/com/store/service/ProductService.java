@@ -1,5 +1,6 @@
 package com.store.service;
 
+import com.store.dto.product.ProductRequestDTO;
 import com.store.dto.product.ProductResponseDTO;
 import com.store.entity.Product;
 import com.store.exception.product.ProductNotFoundException;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -53,5 +55,34 @@ public class ProductService {
             productResponseDTOList.add(productResponseDTO);
         }
         return productResponseDTOList;
+    }
+
+    public ProductResponseDTO createNewProduct(ProductRequestDTO productRequestDTO) {
+       Optional<Product> existingProduct = productRepository.findByNameAndBrand(
+               productRequestDTO.name(),
+               productRequestDTO.brand()
+       );
+
+       if(existingProduct.isPresent()) {
+           throw new ProductAlreadyExistsException("Product with name " + productRequestDTO.name() +
+                                                    "and brand " + productRequestDTO.brand() + " already exists");
+       }
+
+       Product product = Product.builder()
+               .name(productRequestDTO.name())
+               .brand(productRequestDTO.brand())
+               .price(productRequestDTO.price())
+               .stock(productRequestDTO.stock())
+               .build();
+
+       product = productRepository.save(product);
+
+       return new ProductResponseDTO(
+               product.getId(),
+               product.getName(),
+               product.getBrand(),
+               product.getPrice(),
+               product.getStock()
+       );
     }
 }
