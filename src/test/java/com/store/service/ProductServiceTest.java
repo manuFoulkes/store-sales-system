@@ -1,7 +1,9 @@
 package com.store.service;
 
+import com.store.dto.product.ProductRequestDTO;
 import com.store.dto.product.ProductResponseDTO;
 import com.store.entity.Product;
+import com.store.exception.product.ProductAlreadyExistsException;
 import com.store.exception.product.ProductNotFoundException;
 import com.store.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,5 +109,55 @@ public class ProductServiceTest {
         });
 
         verify(productRepository, times(1)).findAll();
+    }
+
+    @Test
+    void createNewProduct_ShouldSuccess_WhenProductNotExists() {
+        Product product = Product.builder()
+                .name("T-Shirt")
+                .brand("Levis")
+                .price(50.0)
+                .stock(20)
+                .build();
+
+        ProductRequestDTO productRequestDTO = new ProductRequestDTO(
+                "T-Shirt",
+                "Levis",
+                50.0,
+                20
+        );
+
+        when(productRepository.save(product)).thenReturn(product);
+
+        ProductResponseDTO productResponseDTO = productService.createNewProduct(productRequestDTO);
+
+        assertEquals(productRequestDTO.name(), productResponseDTO.name());
+        assertEquals(productRequestDTO.brand(), productResponseDTO.brand());
+        assertEquals(productRequestDTO.price(), productResponseDTO.price());
+    }
+
+    @Test
+    void createNewProduct_ShouldThrowAnException_WhenProductAlreadyExists() {
+        Product existingProduct = Product.builder()
+                .name("T-Shirt")
+                .brand("Levis")
+                .price(50.0)
+                .stock(20)
+                .build();
+
+        ProductRequestDTO productRequestDTO = new ProductRequestDTO(
+                "T-Shirt",
+                "Levis",
+                50.0,
+                20
+        );
+
+        when(productRepository.findByNameAndBrand(productRequestDTO.name(), productRequestDTO.brand()))
+                .thenReturn(Optional.of(existingProduct));
+
+        assertThrows(ProductAlreadyExistsException.class, () ->
+                productService.createNewProduct(productRequestDTO));
+
+        verify(productRepository, never()).save(existingProduct);
     }
 }

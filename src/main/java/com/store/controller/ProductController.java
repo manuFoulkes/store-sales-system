@@ -1,5 +1,6 @@
 package com.store.controller;
 
+import com.store.dto.product.ProductRequestDTO;
 import com.store.dto.product.ProductResponseDTO;
 import com.store.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,12 @@ public class ProductController {
 
         return ResponseEntity.ok(productResponseDTOList);
     }
-    
 
+    //TODO: Add @Valid annotation in param for validation
+    @PostMapping
+    public ResponseEntity<ProductResponseDTO> createNewProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+        ProductResponseDTO newProduct = productService.createNewProduct(productRequestDTO);
+
+        return ResponseEntity.ok(newProduct);
+    }
 }
