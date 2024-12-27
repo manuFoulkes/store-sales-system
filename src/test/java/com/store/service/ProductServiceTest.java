@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -208,4 +207,20 @@ public class ProductServiceTest {
         verify(productRepository, never()).save(any(Product.class));
     }
 
+    @Test
+    void deleteProduct_ShouldSuccess_WhenProductExists() {
+        Long existingProductId = 1L;
+        Product existingProduct = Product.builder()
+                .name("T-Shirt")
+                .brand("Levis")
+                .price(50.0)
+                .stock(20)
+                .build();
+
+        when(productRepository.findById(existingProductId)).thenReturn(Optional.of(existingProduct));
+
+        productService.deleteProduct(existingProductId);
+
+        verify(productRepository, times(1)).delete(existingProduct);
+    }
 }
