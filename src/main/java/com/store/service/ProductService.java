@@ -106,4 +106,11 @@ public class ProductService {
                 product.getStock()
         );
     }
+
+    public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " does not exists"));
+
+        productRepository.delete(product);
+    }
 }
