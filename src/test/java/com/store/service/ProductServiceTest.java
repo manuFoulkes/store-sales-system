@@ -223,4 +223,16 @@ public class ProductServiceTest {
 
         verify(productRepository, times(1)).delete(existingProduct);
     }
+
+    @Test
+    void deleteProduct_ShouldThrowAnException_WhenProductNotExists() {
+        Long nonExistingProductId = 1L;
+
+        when(productRepository.findById(nonExistingProductId)).thenReturn(Optional.empty());
+
+        assertThrows(ProductNotFoundException.class,
+                () -> productService.deleteProduct(nonExistingProductId));
+
+        verify(productRepository, times(1)).findById(nonExistingProductId);
+    }
 }
