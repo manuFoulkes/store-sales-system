@@ -8,9 +8,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record SaleResponseDTO(
-   Long id,
-   LocalDate saleDate,
-   BigDecimal totalAmount,
-   CustomerResponseDTO customer,
-   List<SaleDetailResponseDTO> saleDetails
+        Long id,
+        LocalDate saleDate,
+        BigDecimal totalAmount,
+        CustomerResponseDTO customer,
+        List<SaleDetailResponseDTO> saleDetails
 ) {}
