@@ -6,6 +6,7 @@ import com.store.dto.saleDetail.SaleDetailResponseDTO;
 import com.store.entity.Customer;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
+import com.store.exception.sale.SaleNotFoundException;
 import com.store.repository.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
