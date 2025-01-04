@@ -5,6 +5,7 @@ import com.store.entity.Customer;
 import com.store.entity.Product;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
+import com.store.exception.sale.SaleNotFoundException;
 import com.store.repository.SaleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +21,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class SaleServiceTest {
@@ -83,5 +84,17 @@ public class SaleServiceTest {
         assertEquals(saleResponseDTO.saleDetails().get(0).price(), sale.getSaleDetails().get(0).getPrice());
 
         verify(saleRepository).findById(existingSaleId);
+    }
+
+    @Test
+    void GetSaleById_ShouldThrowAnException_WhenSaleNotExist() {
+        Long nonExistingSale = 1L;
+
+        when(saleRepository.findById(nonExistingSale)).thenReturn(Optional.empty());
+
+        assertThrows(SaleNotFoundException.class, () ->
+                saleService.getSaleById(nonExistingSale));
+
+        verify(saleRepository, times(1)).findById(nonExistingSale);
     }
 }
