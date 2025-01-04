@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/sales")
 public class SaleController {
@@ -24,5 +26,12 @@ public class SaleController {
     @GetMapping("{id}")
     public ResponseEntity<SaleResponseDTO> getSailById(@PathVariable Long id) {
         return new ResponseEntity<>(saleService.getSaleById(id), HttpStatus.FOUND);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SaleResponseDTO>> getAllSales() {
+        List<SaleResponseDTO> saleResponseDTOList = saleService.getAllService();
+
+        return ResponseEntity.ok(saleResponseDTOList);
     }
 }
