@@ -1,6 +1,8 @@
 package com.store.service;
 
+import com.store.dto.customer.CustomerResponseDTO;
 import com.store.dto.sale.SaleResponseDTO;
+import com.store.dto.saleDetail.SaleDetailResponseDTO;
 import com.store.entity.Customer;
 import com.store.entity.Product;
 import com.store.entity.Sale;
@@ -37,7 +39,7 @@ public class SaleServiceTest {
     void setUp() {}
 
     @Test
-    void GetSaleById_ShouldReturnASale_WhenSaleExist() {
+    void getSaleById_ShouldReturnASale_WhenSaleExist() {
         Long existingSaleId = 1L;
 
         Customer customer = Customer.builder()
@@ -47,7 +49,6 @@ public class SaleServiceTest {
                 .email("jd@gmail.com")
                 .build();
 
-        //Product: id, name, brand, price, stock
         Product product = Product.builder()
                 .id(1L)
                 .name("Blue Cheese")
@@ -56,7 +57,6 @@ public class SaleServiceTest {
                 .stock(15)
                 .build();
 
-        //SaleDetail: id,product,quantity,price
         List<SaleDetail> saleDetails = new ArrayList<>();
         SaleDetail saleDetail1 = SaleDetail.builder()
                 .id(1L)
@@ -66,7 +66,6 @@ public class SaleServiceTest {
                 .build();
         saleDetails.add(saleDetail1);
 
-        //Sale: id, saleDate, totalAmount, customer, saleDetails
         Sale sale = Sale.builder()
                 .id(1L)
                 .saleDate(LocalDate.now())
@@ -87,7 +86,7 @@ public class SaleServiceTest {
     }
 
     @Test
-    void GetSaleById_ShouldThrowAnException_WhenSaleNotExist() {
+    void getSaleById_ShouldThrowAnException_WhenSaleNotExist() {
         Long nonExistingSale = 1L;
 
         when(saleRepository.findById(nonExistingSale)).thenReturn(Optional.empty());
@@ -96,5 +95,51 @@ public class SaleServiceTest {
                 saleService.getSaleById(nonExistingSale));
 
         verify(saleRepository, times(1)).findById(nonExistingSale);
+    }
+
+    @Test
+    void getAllSales_ShouldReturnAListOfSales_WhenSalesExists() {
+        Customer customer = Customer.builder()
+                .id(1L)
+                .name("John")
+                .lastName("Doe")
+                .email("jd@gmail.com")
+                .build();
+
+        Product product = Product.builder()
+                .id(1L)
+                .name("Blue Cheese")
+                .brand("La Serenisima")
+                .price(6000)
+                .stock(15)
+                .build();
+
+        List<SaleDetail> saleDetails = new ArrayList<>();
+        SaleDetail saleDetail1 = SaleDetail.builder()
+                .id(1L)
+                .product(product)
+                .quantity(1)
+                .price(BigDecimal.valueOf(6000))
+                .build();
+        saleDetails.add(saleDetail1);
+
+        Sale sale = Sale.builder()
+                .id(1L)
+                .saleDate(LocalDate.now())
+                .totalAmount(BigDecimal.valueOf(6000))
+                .customer(customer)
+                .saleDetails(saleDetails)
+                .build();
+
+        List<Sale> saleList = new ArrayList<>();
+
+        saleList.add(sale);
+
+        when(saleRepository.findAll()).thenReturn(saleList);
+
+        List<SaleResponseDTO> saleResponseDTOList = saleService.getAllSales();
+
+        assertEquals(saleList.size(), saleResponseDTOList.size());
+        assertEquals(saleList.get(0).getCustomer().getName(), saleResponseDTOList.get(0).customer().name());
     }
 }
