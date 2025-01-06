@@ -30,7 +30,7 @@ public class SaleController {
 
     @GetMapping
     public ResponseEntity<List<SaleResponseDTO>> getAllSales() {
-        List<SaleResponseDTO> saleResponseDTOList = saleService.getAllService();
+        List<SaleResponseDTO> saleResponseDTOList = saleService.getAllSales();
 
         return ResponseEntity.ok(saleResponseDTOList);
     }

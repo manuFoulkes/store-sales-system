@@ -24,19 +24,12 @@ public class SaleService {
         this.saleRepository = saleRepository;
     }
 
-    // TODO: Create 'SaleNotFoundException' class, implement MapStruct
+    // TODO: Implement MapStruct
     public SaleResponseDTO getSaleById(Long id) {
         Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new SaleNotFoundException("Sale with id " + id + " does not exists"));
 
-        Customer customer = sale.getCustomer();
-
-        CustomerResponseDTO customerResponseDTO = new CustomerResponseDTO(
-                customer.getId(),
-                customer.getName(),
-                customer.getLastName(),
-                customer.getEmail()
-        );
+        CustomerResponseDTO customerResponseDTO = getCustomerResponseDTO(sale);
 
         List<SaleDetailResponseDTO> saleDetailsResponse = getSaleDetailResponseDTOS(sale);
 
@@ -46,6 +39,35 @@ public class SaleService {
                 sale.getTotalAmount(),
                 customerResponseDTO,
                 saleDetailsResponse
+        );
+    }
+
+    public List<SaleResponseDTO> getAllSales() {
+        List<Sale> saleList = saleRepository.findAll();
+        List<SaleResponseDTO> saleResponseDTOList = new ArrayList<>();
+
+        for(Sale sale : saleList) {
+            SaleResponseDTO saleResponseDTO = new SaleResponseDTO(
+                    sale.getId(),
+                    sale.getSaleDate(),
+                    sale.getTotalAmount(),
+                    getCustomerResponseDTO(sale),
+                    getSaleDetailResponseDTOS(sale)
+            );
+            saleResponseDTOList.add(saleResponseDTO);
+        }
+
+        return saleResponseDTOList;
+    }
+
+    private CustomerResponseDTO getCustomerResponseDTO(Sale sale) {
+        Customer customer = sale.getCustomer();
+
+        return new CustomerResponseDTO(
+                customer.getId(),
+                customer.getName(),
+                customer.getLastName(),
+                customer.getEmail()
         );
     }
 
