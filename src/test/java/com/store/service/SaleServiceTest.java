@@ -1,8 +1,6 @@
 package com.store.service;
 
-import com.store.dto.customer.CustomerResponseDTO;
 import com.store.dto.sale.SaleResponseDTO;
-import com.store.dto.saleDetail.SaleDetailResponseDTO;
 import com.store.entity.Customer;
 import com.store.entity.Product;
 import com.store.entity.Sale;
@@ -18,12 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -141,5 +136,16 @@ public class SaleServiceTest {
 
         assertEquals(saleList.size(), saleResponseDTOList.size());
         assertEquals(saleList.get(0).getCustomer().getName(), saleResponseDTOList.get(0).customer().name());
+    }
+
+    @Test
+    void getAllSales_ShouldReturnAnEmptyList_WhenSalesNotExists() {
+        when(saleRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<SaleResponseDTO> saleResponseDTOList = saleService.getAllSales();
+
+        assertTrue(saleResponseDTOList.isEmpty());
+
+        verify(saleRepository).findAll();
     }
 }
