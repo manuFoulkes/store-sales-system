@@ -1,14 +1,12 @@
 package com.store.controller;
 
+import com.store.dto.sale.SaleRequestDTO;
 import com.store.dto.sale.SaleResponseDTO;
 import com.store.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,5 +31,12 @@ public class SaleController {
         List<SaleResponseDTO> saleResponseDTOList = saleService.getAllSales();
 
         return ResponseEntity.ok(saleResponseDTOList);
+    }
+    
+    @PostMapping
+    public ResponseEntity<SaleResponseDTO> createNewSale(@RequestBody SaleRequestDTO saleRequestDTO) {
+        SaleResponseDTO newSale = saleService.createNewSale(saleRequestDTO);
+
+        return ResponseEntity.ok(newSale);
     }
 }
