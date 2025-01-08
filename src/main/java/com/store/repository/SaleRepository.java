@@ -11,4 +11,5 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     @Query("SELECT COUNT(s) FROM Sale S WHERE s.customer.id = :customerId AND s.saleDate = :saleDate")
     int countSalesByCustomerAndDate(@Param("customerId") Long customerId, @Param("saleDate")LocalDate saleDate);
+
 }

@@ -10,7 +10,9 @@ import com.store.entity.Product;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
 import com.store.exception.customer.CustomerNotFoundException;
+import com.store.exception.product.InsufficientStockException;
 import com.store.exception.product.ProductNotFoundException;
+import com.store.exception.sale.MaxSalesPerDayException;
 import com.store.exception.sale.SaleNotFoundException;
 import com.store.repository.CustomerRepository;
 import com.store.repository.ProductRepository;
@@ -79,11 +81,9 @@ public class SaleService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with id " + customerId + " not found"));
 
-        // TODO: Create countSalesByCustomerAndDate method in CustomerRepository
-        int customerSalesCount = customerRepository.countSalesByCustomerAndDate(customerId, LocalDate.now());
+        int customerSalesToday = saleRepository.countSalesByCustomerAndDate(customerId, LocalDate.now());
 
-        // TODO: Create MaxSalesPerDayException class
-        if(customerSalesCount >= maxSalesPerDay) {
+        if(customerSalesToday >= maxSalesPerDay) {
             throw new MaxSalesPerDayException("The customer has reached the maximum sales limit");
         }
 
@@ -95,7 +95,6 @@ public class SaleService {
             Product product = productRepository.findById(detailRequest.productId())
                     .orElseThrow(() -> new ProductNotFoundException("Product with id " + detailRequest.productId() + " not found"));
 
-            // TODO: Create insufficientStockException class
             if(product.getStock() < detailRequest.quantity()) {
                 throw new InsufficientStockException("Insufficient stock for product " + product.getName());
             }
