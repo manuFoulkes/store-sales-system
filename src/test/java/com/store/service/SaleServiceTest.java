@@ -1,11 +1,15 @@
 package com.store.service;
 
+import com.store.dto.sale.SaleRequestDTO;
 import com.store.dto.sale.SaleResponseDTO;
+import com.store.dto.saleDetail.SaleDetailRequestDTO;
 import com.store.entity.Customer;
 import com.store.entity.Product;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
 import com.store.exception.sale.SaleNotFoundException;
+import com.store.repository.CustomerRepository;
+import com.store.repository.ProductRepository;
 import com.store.repository.SaleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +30,12 @@ public class SaleServiceTest {
 
     @Mock
     private SaleRepository saleRepository;
+
+    @Mock
+    private CustomerRepository customerRepository;
+
+    @Mock
+    private ProductRepository productRepository;
 
     @InjectMocks
     private SaleService saleService;
@@ -147,5 +157,58 @@ public class SaleServiceTest {
         assertTrue(saleResponseDTOList.isEmpty());
 
         verify(saleRepository).findAll();
+    }
+
+    // TODO: Refactor
+    @Test
+    void createNewSale_ShouldReturnSaleResponseDTO_IfSuccess () {
+        Customer customer = Customer.builder()
+                .id(1L)
+                .name("John")
+                .lastName("Doe")
+                .email("jd@gmail.com")
+                .build();
+
+        Product product = Product.builder()
+                .id(1L)
+                .name("Blue Cheese")
+                .brand("La Serenisima")
+                .price(6000)
+                .stock(15)
+                .build();
+
+        List<SaleDetail> saleDetails = new ArrayList<>();
+        SaleDetail saleDetail1 = SaleDetail.builder()
+                .product(product)
+                .quantity(1)
+                .price(BigDecimal.valueOf(6000))
+                .build();
+        saleDetails.add(saleDetail1);
+
+
+        Sale sale = Sale.builder()
+                .saleDate(LocalDate.now())
+                .totalAmount(BigDecimal.valueOf(6000))
+                .customer(customer)
+                .saleDetails(saleDetails)
+                .build();
+
+
+        List<SaleDetailRequestDTO> detailsRequest = new ArrayList<>();
+        SaleDetailRequestDTO detailRequest = new SaleDetailRequestDTO(1L, 1, BigDecimal.valueOf(6000));
+
+        detailsRequest.add(detailRequest);
+
+        SaleRequestDTO saleRequestDTO = new SaleRequestDTO(1L, detailsRequest);
+
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+        when(saleRepository.save(sale)).thenReturn(sale);
+
+        SaleResponseDTO saleResponseDTO = saleService.createNewSale(saleRequestDTO);
+
+        assertEquals(saleResponseDTO.totalAmount(), sale.getTotalAmount());
+        assertEquals(saleResponseDTO.customer().name(), sale.getCustomer().getName());
+        assertEquals(saleResponseDTO.saleDetails().get(0).productName(), sale.getSaleDetails().get(0).getProduct().getName());
     }
 }
