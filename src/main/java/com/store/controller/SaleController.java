@@ -32,7 +32,7 @@ public class SaleController {
 
         return ResponseEntity.ok(saleResponseDTOList);
     }
-    
+
     @PostMapping
     public ResponseEntity<SaleResponseDTO> createNewSale(@RequestBody SaleRequestDTO saleRequestDTO) {
         SaleResponseDTO newSale = saleService.createNewSale(saleRequestDTO);
