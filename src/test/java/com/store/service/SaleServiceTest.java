@@ -9,6 +9,7 @@ import com.store.entity.Product;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
 import com.store.exception.customer.CustomerNotFoundException;
+import com.store.exception.product.ProductNotFoundException;
 import com.store.exception.sale.SaleNotFoundException;
 import com.store.repository.CustomerRepository;
 import com.store.repository.ProductRepository;
@@ -27,6 +28,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+//TODO: Fix methods names and refactor
 @ExtendWith(MockitoExtension.class)
 public class SaleServiceTest {
 
@@ -232,5 +234,33 @@ public class SaleServiceTest {
 
         verify(customerRepository).findById(nonExistingCustomerId);
         verifyNoInteractions(productRepository, saleRepository);
+    }
+
+    @Test
+    void createNewSale_ShouldThrowAnException_IfProductDoesNotExist() {
+        Customer customer = Customer.builder()
+                .id(1L)
+                .name("John")
+                .lastName("Doe")
+                .email("jd@gmail.com")
+                .build();
+
+        Long nonExistingProduct = 1L;
+        List<SaleDetailRequestDTO> detailsRequest = new ArrayList<>();
+        SaleDetailRequestDTO detailRequest = new SaleDetailRequestDTO(nonExistingProduct, 1, BigDecimal.valueOf(6000));
+        detailsRequest.add(detailRequest);
+
+        SaleRequestDTO saleRequest = new SaleRequestDTO(customer.getId(), detailsRequest);
+
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(productRepository.findById(nonExistingProduct)).thenReturn(Optional.empty());
+
+        assertThrows(ProductNotFoundException.class,
+                () -> saleService.createNewSale(saleRequest),
+                "Expected ProductNotFoundException when product does not exist"
+        );
+
+        verify(customerRepository).findById(customer.getId());
+        verify(productRepository).findById(nonExistingProduct);
     }
 }
