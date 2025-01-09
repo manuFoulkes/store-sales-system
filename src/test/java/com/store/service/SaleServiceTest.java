@@ -3,10 +3,12 @@ package com.store.service;
 import com.store.dto.sale.SaleRequestDTO;
 import com.store.dto.sale.SaleResponseDTO;
 import com.store.dto.saleDetail.SaleDetailRequestDTO;
+import com.store.dto.saleDetail.SaleDetailResponseDTO;
 import com.store.entity.Customer;
 import com.store.entity.Product;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
+import com.store.exception.customer.CustomerNotFoundException;
 import com.store.exception.sale.SaleNotFoundException;
 import com.store.repository.CustomerRepository;
 import com.store.repository.ProductRepository;
@@ -210,5 +212,25 @@ public class SaleServiceTest {
         assertEquals(saleResponseDTO.totalAmount(), sale.getTotalAmount());
         assertEquals(saleResponseDTO.customer().name(), sale.getCustomer().getName());
         assertEquals(saleResponseDTO.saleDetails().get(0).productName(), sale.getSaleDetails().get(0).getProduct().getName());
+    }
+
+    @Test
+    void createNewSale_ShouldThrowAnException_IfCustomerNotExist() {
+        Long nonExistingCustomerId = 1L;
+        List<SaleDetailRequestDTO> detailsRequest = new ArrayList<>();
+        SaleDetailRequestDTO detailRequest = new SaleDetailRequestDTO(1L, 1, BigDecimal.valueOf(6000));
+        detailsRequest.add(detailRequest);
+
+        SaleRequestDTO saleRequest = new SaleRequestDTO(nonExistingCustomerId, detailsRequest);
+
+        when(customerRepository.findById(nonExistingCustomerId)).thenReturn(Optional.empty());
+
+        assertThrows(CustomerNotFoundException.class,
+                () -> saleService.createNewSale(saleRequest),
+                "Expected CustomerNotFoundException when customer does not exist"
+        );
+
+        verify(customerRepository).findById(nonExistingCustomerId);
+        verifyNoInteractions(productRepository, saleRepository);
     }
 }
