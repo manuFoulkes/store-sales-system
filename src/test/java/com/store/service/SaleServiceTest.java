@@ -3,13 +3,13 @@ package com.store.service;
 import com.store.dto.sale.SaleRequestDTO;
 import com.store.dto.sale.SaleResponseDTO;
 import com.store.dto.saleDetail.SaleDetailRequestDTO;
-import com.store.dto.saleDetail.SaleDetailResponseDTO;
 import com.store.entity.Customer;
 import com.store.entity.Product;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
 import com.store.exception.customer.CustomerNotFoundException;
 import com.store.exception.product.ProductNotFoundException;
+import com.store.exception.sale.MaxSalesPerDayException;
 import com.store.exception.sale.SaleNotFoundException;
 import com.store.repository.CustomerRepository;
 import com.store.repository.ProductRepository;
@@ -199,7 +199,10 @@ public class SaleServiceTest {
 
 
         List<SaleDetailRequestDTO> detailsRequest = new ArrayList<>();
-        SaleDetailRequestDTO detailRequest = new SaleDetailRequestDTO(1L, 1, BigDecimal.valueOf(6000));
+        SaleDetailRequestDTO detailRequest = new SaleDetailRequestDTO(1L,
+                1,
+                BigDecimal.valueOf(6000)
+        );
 
         detailsRequest.add(detailRequest);
 
@@ -262,5 +265,34 @@ public class SaleServiceTest {
 
         verify(customerRepository).findById(customer.getId());
         verify(productRepository).findById(nonExistingProduct);
+    }
+
+    @Test
+    void createNewSale_ShouldThrowAnException_IfMaxSalesPerDayExceeded() {
+        Customer customer = Customer.builder()
+                .id(1L)
+                .name("John")
+                .lastName("Doe")
+                .email("jd@gmail.com")
+                .build();
+
+        List<SaleDetailRequestDTO> detailsRequest = new ArrayList<>();
+        SaleDetailRequestDTO detailRequest = new SaleDetailRequestDTO(1L, 1, BigDecimal.valueOf(6000));
+
+        detailsRequest.add(detailRequest);
+
+        SaleRequestDTO saleRequestDTO = new SaleRequestDTO(1L, detailsRequest);
+
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(saleRepository.countSalesByCustomerAndDate(customer.getId(), LocalDate.now())).thenReturn(4);
+
+        assertThrows(MaxSalesPerDayException.class,
+                () -> saleService.createNewSale(saleRequestDTO));
+
+    }
+
+    @Test
+    void createNewSale_ShouldThrowAnException_IfStockIsInsufficient() {
+
     }
 }
