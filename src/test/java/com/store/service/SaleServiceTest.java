@@ -8,6 +8,7 @@ import com.store.entity.Product;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
 import com.store.exception.customer.CustomerNotFoundException;
+import com.store.exception.product.InsufficientStockException;
 import com.store.exception.product.ProductNotFoundException;
 import com.store.exception.sale.MaxSalesPerDayException;
 import com.store.exception.sale.SaleNotFoundException;
@@ -288,11 +289,39 @@ public class SaleServiceTest {
 
         assertThrows(MaxSalesPerDayException.class,
                 () -> saleService.createNewSale(saleRequestDTO));
-
     }
 
     @Test
     void createNewSale_ShouldThrowAnException_IfStockIsInsufficient() {
+        Customer customer = Customer.builder()
+                .id(1L)
+                .name("John")
+                .lastName("Doe")
+                .email("jd@gmail.com")
+                .build();
 
+        Product product = Product.builder()
+                .id(1L)
+                .name("Blue Cheese")
+                .brand("La Serenisima")
+                .price(6000)
+                .stock(0)
+                .build();
+
+        List<SaleDetailRequestDTO> detailsRequest = new ArrayList<>();
+        SaleDetailRequestDTO detailRequest = new SaleDetailRequestDTO(1L,
+                1,
+                BigDecimal.valueOf(6000)
+        );
+
+        detailsRequest.add(detailRequest);
+
+        SaleRequestDTO saleRequestDTO = new SaleRequestDTO(1L, detailsRequest);
+
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+
+        assertThrows(InsufficientStockException.class,
+                () -> saleService.createNewSale(saleRequestDTO));
     }
 }
