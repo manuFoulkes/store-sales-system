@@ -159,6 +159,8 @@ public class SaleService {
             productRepository.save(product);
         }
 
+        sale.setStatus(SaleStatus.CANCELED);
+
         saleRepository.save(sale);
 
         List<SaleDetailResponseDTO> detailsResponse = getSaleDetailResponseDTOS(sale);

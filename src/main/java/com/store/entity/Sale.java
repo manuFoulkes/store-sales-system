@@ -37,6 +37,7 @@ public class Sale {
     @OneToMany(mappedBy = "sale",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private SaleStatus status = SaleStatus.ACTIVE;
