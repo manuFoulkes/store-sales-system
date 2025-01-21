@@ -11,6 +11,7 @@ import com.store.enums.SaleStatus;
 import com.store.exception.customer.CustomerNotFoundException;
 import com.store.exception.product.InsufficientStockException;
 import com.store.exception.product.ProductNotFoundException;
+import com.store.exception.sale.InvalidSaleStateException;
 import com.store.exception.sale.MaxSalesPerDayException;
 import com.store.exception.sale.SaleNotFoundException;
 import com.store.repository.CustomerRepository;
@@ -367,5 +368,62 @@ public class SaleServiceTest {
         SaleResponseDTO saleResponse = saleService.cancelSale(existingSaleId);
 
         assertEquals(SaleStatus.CANCELED, saleResponse.saleStatus());
+    }
+
+    @Test
+    void cancelSale_ShouldThrowAnException_IfSaleNotExist() {
+        Long nonExistingSaleId = 1L;
+
+        when(saleRepository.findById(nonExistingSaleId)).thenReturn(Optional.empty());
+
+        assertThrows(SaleNotFoundException.class,
+                () -> saleService.cancelSale(nonExistingSaleId));
+
+        verify(saleRepository).findById(nonExistingSaleId);
+    }
+
+    @Test
+    void cancelSale_ShouldThrowAnException_IfSaleStatusIsCanceled() {
+        Long existingSaleId = 1L;
+
+        Customer customer = Customer.builder()
+                .id(1L)
+                .name("John")
+                .lastName("Doe")
+                .email("jd@gmail.com")
+                .build();
+
+        Product product = Product.builder()
+                .id(1L)
+                .name("Blue Cheese")
+                .brand("La Serenisima")
+                .price(6000)
+                .stock(15)
+                .build();
+
+        List<SaleDetail> saleDetails = new ArrayList<>();
+        SaleDetail saleDetail1 = SaleDetail.builder()
+                .product(product)
+                .quantity(1)
+                .price(BigDecimal.valueOf(6000))
+                .build();
+        saleDetails.add(saleDetail1);
+
+
+        Sale sale = Sale.builder()
+                .id(existingSaleId)
+                .saleDate(LocalDate.now())
+                .totalAmount(BigDecimal.valueOf(6000))
+                .customer(customer)
+                .saleDetails(saleDetails)
+                .status(SaleStatus.CANCELED)
+                .build();
+
+        when(saleRepository.findById(existingSaleId)).thenReturn(Optional.of(sale));
+
+        assertThrows(InvalidSaleStateException.class,
+                () -> saleService.cancelSale(existingSaleId));
+
+        verify(saleRepository).findById(existingSaleId);
     }
 }
