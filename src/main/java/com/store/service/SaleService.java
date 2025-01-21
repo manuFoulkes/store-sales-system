@@ -55,7 +55,8 @@ public class SaleService {
                 sale.getSaleDate(),
                 sale.getTotalAmount(),
                 customerResponseDTO,
-                saleDetailsResponse
+                saleDetailsResponse,
+                sale.getStatus()
         );
     }
 
@@ -69,7 +70,8 @@ public class SaleService {
                     sale.getSaleDate(),
                     sale.getTotalAmount(),
                     getCustomerResponseDTO(sale),
-                    getSaleDetailResponseDTOS(sale)
+                    getSaleDetailResponseDTOS(sale),
+                    sale.getStatus()
             );
             saleResponseDTOList.add(saleResponseDTO);
         }
@@ -138,7 +140,8 @@ public class SaleService {
                 newSale.getSaleDate(),
                 newSale.getTotalAmount(),
                 customerResponseDTO,
-                detailResponseDTOS
+                detailResponseDTOS,
+                newSale.getStatus()
         );
     }
 
@@ -167,7 +170,8 @@ public class SaleService {
                 sale.getSaleDate(),
                 sale.getTotalAmount(),
                 customerResponse,
-                detailsResponse
+                detailsResponse,
+                sale.getStatus()
         );
     }
 
