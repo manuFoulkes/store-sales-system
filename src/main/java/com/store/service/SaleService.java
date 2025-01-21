@@ -9,9 +9,11 @@ import com.store.entity.Customer;
 import com.store.entity.Product;
 import com.store.entity.Sale;
 import com.store.entity.SaleDetail;
+import com.store.enums.SaleStatus;
 import com.store.exception.customer.CustomerNotFoundException;
 import com.store.exception.product.InsufficientStockException;
 import com.store.exception.product.ProductNotFoundException;
+import com.store.exception.sale.InvalidSaleStateException;
 import com.store.exception.sale.MaxSalesPerDayException;
 import com.store.exception.sale.SaleNotFoundException;
 import com.store.repository.CustomerRepository;
@@ -53,7 +55,8 @@ public class SaleService {
                 sale.getSaleDate(),
                 sale.getTotalAmount(),
                 customerResponseDTO,
-                saleDetailsResponse
+                saleDetailsResponse,
+                sale.getStatus()
         );
     }
 
@@ -67,7 +70,8 @@ public class SaleService {
                     sale.getSaleDate(),
                     sale.getTotalAmount(),
                     getCustomerResponseDTO(sale),
-                    getSaleDetailResponseDTOS(sale)
+                    getSaleDetailResponseDTOS(sale),
+                    sale.getStatus()
             );
             saleResponseDTOList.add(saleResponseDTO);
         }
@@ -136,7 +140,40 @@ public class SaleService {
                 newSale.getSaleDate(),
                 newSale.getTotalAmount(),
                 customerResponseDTO,
-                detailResponseDTOS
+                detailResponseDTOS,
+                newSale.getStatus()
+        );
+    }
+
+    public SaleResponseDTO cancelSale(Long id) {
+        Sale sale = saleRepository.findById(id)
+                .orElseThrow(() -> new SaleNotFoundException("Sale with id " + id + " not found"));
+
+        if(sale.getStatus() == SaleStatus.CANCELED) {
+            throw new InvalidSaleStateException("The sale with id " + id + "is already canceled");
+        }
+
+        for(SaleDetail detail : sale.getSaleDetails()) {
+            Product product = detail.getProduct();
+            product.setStock(product.getStock() + detail.getQuantity());
+            productRepository.save(product);
+        }
+
+        sale.setStatus(SaleStatus.CANCELED);
+
+        saleRepository.save(sale);
+
+        List<SaleDetailResponseDTO> detailsResponse = getSaleDetailResponseDTOS(sale);
+
+        CustomerResponseDTO customerResponse = getCustomerResponseDTO(sale);
+
+        return new SaleResponseDTO(
+                sale.getId(),
+                sale.getSaleDate(),
+                sale.getTotalAmount(),
+                customerResponse,
+                detailsResponse,
+                sale.getStatus()
         );
     }
 

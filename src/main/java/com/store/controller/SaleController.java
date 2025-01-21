@@ -39,4 +39,11 @@ public class SaleController {
 
         return ResponseEntity.ok(newSale);
     }
+
+    @PutMapping("{id}")
+    public ResponseEntity<SaleResponseDTO> cancelSale(@PathVariable Long id) {
+        SaleResponseDTO cancelSale = saleService.cancelSale(id);
+
+        return ResponseEntity.ok(cancelSale);
+    }
 }
