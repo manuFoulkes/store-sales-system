@@ -2,6 +2,7 @@ package com.store.dto.sale;
 
 import com.store.dto.customer.CustomerResponseDTO;
 import com.store.dto.saleDetail.SaleDetailResponseDTO;
+import com.store.enums.SaleStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,5 +13,6 @@ public record SaleResponseDTO(
         LocalDate saleDate,
         BigDecimal totalAmount,
         CustomerResponseDTO customer,
-        List<SaleDetailResponseDTO> saleDetails
+        List<SaleDetailResponseDTO> saleDetails,
+        SaleStatus saleStatus
 ) {}
