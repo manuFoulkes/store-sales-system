@@ -33,7 +33,7 @@ public class Product {
     @Column(name = "stock", nullable = false)
     private int stock;
 
-    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
 
 }
