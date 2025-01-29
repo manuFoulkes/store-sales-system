@@ -85,20 +85,25 @@ public class CustomerServiceTest {
 
     @Test
     void getAllCustomers_ShouldReturnAListOfCustomers_WhenCustomersExists() {
-        List<Customer> customers = new ArrayList<>();
-        Customer customer1 = new Customer("John", "Doe", "john.doe@gmail.com");
-        Customer customer2 = new Customer("Martin", "Fowler", "m.fowler@gmail.com");
+        List<Customer> customers = List.of(
+                new Customer("John", "Doe", "john.doe@gmail.com"),
+                new Customer("Martin", "Fowler", "m.fowler@gmail.com")
+        );
 
-        customers.add(customer1);
-        customers.add(customer2);
+        List<CustomerResponseDTO> customerResponseDTOS = List.of(
+                new CustomerResponseDTO(1L, "John", "Doe", "john.doe@gmail.com"),
+                new CustomerResponseDTO(2L, "Martin", "Fowler", "m.fowler@gmail.com")
+        );
 
         when(customerRepository.findAll()).thenReturn(customers);
+        when(customerMapper.toCustomerResponse(customers.get(0))).thenReturn(customerResponseDTOS.get(0));
+        when(customerMapper.toCustomerResponse(customers.get(1))).thenReturn(customerResponseDTOS.get(1));
 
-        List<CustomerResponseDTO> customerResponseDTOS = customerService.getAllCustomers();
+        List<CustomerResponseDTO> expectedResponse = customerService.getAllCustomers();
 
         assertEquals(customers.size(), customerResponseDTOS.size());
-        assertEquals(customer1.getName(), customerResponseDTOS.get(0).name());
-        assertEquals(customer2.getName(), customerResponseDTOS.get(1).name());
+        assertEquals(customerResponseDTOS.get(0).name(), expectedResponse.get(0).name());
+        assertEquals(customerResponseDTOS.get(1).name(), expectedResponse.get(1).name());
     }
 
     @Test

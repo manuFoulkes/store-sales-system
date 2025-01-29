@@ -43,13 +43,7 @@ public class CustomerService {
         List<CustomerResponseDTO> customersResponse = new ArrayList<>();
 
         for(Customer customer : customers) {
-            CustomerResponseDTO customerResponse = new CustomerResponseDTO(
-                    customer.getId(),
-                    customer.getName(),
-                    customer.getLastName(),
-                    customer.getEmail()
-            );
-
+            CustomerResponseDTO customerResponse = customerMapper.toCustomerResponse(customer);
             customersResponse.add(customerResponse);
         }
 
