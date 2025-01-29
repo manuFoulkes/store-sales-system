@@ -77,12 +77,7 @@ public class CustomerService {
 
         customerRepository.save(customer);
 
-        return new CustomerResponseDTO(
-                customer.getId(),
-                customer.getName(),
-                customer.getLastName(),
-                customer.getEmail()
-        );
+        return customerMapper.toCustomerResponse(customer);
     }
 
     public void deleteCustomer(Long id) {

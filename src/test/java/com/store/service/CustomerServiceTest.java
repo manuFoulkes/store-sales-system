@@ -163,21 +163,34 @@ public class CustomerServiceTest {
 
     @Test
     void updateCustomer_ShouldSuccess_WhenCustomerExists() {
-        Customer existingCustomer = new Customer("John", "Doe", "john.doe@gmail.com");
+        Customer existingCustomer = new Customer(
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
         CustomerRequestDTO customerRequestDTO = new CustomerRequestDTO(
             "John",
             "Doe",
             "john.doe@gmail.com"
         );
 
+        CustomerResponseDTO expectedResponse = new CustomerResponseDTO(
+                1L,
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
         when(customerRepository.findById(anyLong())).thenReturn(Optional.of(existingCustomer));
         when(customerRepository.save(existingCustomer)).thenReturn(existingCustomer);
+        when(customerMapper.toCustomerResponse(existingCustomer)).thenReturn(expectedResponse);
 
-        CustomerResponseDTO updatedCustomer = customerService.updateCustomer(1L, customerRequestDTO);
+        CustomerResponseDTO actualResponse = customerService.updateCustomer(1L, customerRequestDTO);
 
-        assertEquals(updatedCustomer.name(), customerRequestDTO.name());
-        assertEquals(updatedCustomer.lastName(), customerRequestDTO.lastName());
-        assertEquals(updatedCustomer.email(), customerRequestDTO.email());
+        assertEquals(expectedResponse.name(), actualResponse.name());
+        assertEquals(expectedResponse.lastName(), actualResponse.lastName());
+        assertEquals(expectedResponse.email(), actualResponse.email());
     }
 
     @Test
