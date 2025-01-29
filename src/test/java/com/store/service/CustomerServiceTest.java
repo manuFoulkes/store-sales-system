@@ -5,6 +5,7 @@ import com.store.dto.customer.CustomerResponseDTO;
 import com.store.entity.Customer;
 import com.store.exception.customer.CustomerAlreadyExistsException;
 import com.store.exception.customer.CustomerNotFoundException;
+import com.store.mapper.CustomerMapper;
 import com.store.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +27,9 @@ public class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;
+
+    @Mock
+    private CustomerMapper customerMapper;
 
     @InjectMocks
     private CustomerService customerService;
@@ -46,11 +49,25 @@ public class CustomerServiceTest {
                 .email("john.doe@gmail.com")
                 .build();
 
+        CustomerResponseDTO expectedResponse = new CustomerResponseDTO(
+                customerId,
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
         when(customerRepository.findById(customerId)).thenReturn(Optional.of(expectedCustomer));
+        when(customerMapper.toCustomerResponse(expectedCustomer)).thenReturn(expectedResponse);
 
-        CustomerResponseDTO customerResponseDTO = customerService.getCustomerById(customerId);
+        CustomerResponseDTO actualResponse = customerService.getCustomerById(customerId);
 
-        assertEquals(expectedCustomer.getName(), customerResponseDTO.name());
+        assertNotNull(actualResponse);
+        assertEquals(expectedResponse.name(), actualResponse.name());
+        assertEquals(expectedResponse.lastName(), actualResponse.lastName());
+        assertEquals(expectedResponse.email(), actualResponse.email());
+
+        verify(customerRepository).findById(customerId);
+        verify(customerMapper).toCustomerResponse(expectedCustomer);
     }
 
     @Test
