@@ -119,16 +119,33 @@ public class CustomerServiceTest {
 
     @Test
     void createCustomer_ShouldSuccess_WhenCustomerDoesNotExist() {
-        Customer customer = new Customer("John", "Doe", "john.doe@gmail.com");
-        CustomerRequestDTO customerRequestDTO = new CustomerRequestDTO("John", "Doe", "john.doe@gmail.com");
+        Customer customer = new Customer(
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
+        CustomerRequestDTO customerRequest = new CustomerRequestDTO(
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
+        CustomerResponseDTO expectedResponse = new CustomerResponseDTO(
+                1L,
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
 
         when(customerRepository.save(customer)).thenReturn(customer);
+        when(customerMapper.toCustomerResponse(customer)).thenReturn(expectedResponse);
 
-        CustomerResponseDTO customerResponseDTO = customerService.createCustomer(customerRequestDTO);
+        CustomerResponseDTO actualResponse = customerService.createCustomer(customerRequest);
 
-        assertEquals(customer.getName(), customerResponseDTO.name());
-        assertEquals(customer.getLastName(), customerResponseDTO.lastName());
-        assertEquals(customer.getEmail(), customerResponseDTO.email());
+        assertEquals(expectedResponse.name(), actualResponse.name());
+        assertEquals(expectedResponse.lastName(), actualResponse.lastName());
+        assertEquals(expectedResponse.email(), actualResponse.email());
     }
 
     @Test
