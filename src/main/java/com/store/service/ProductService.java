@@ -5,6 +5,7 @@ import com.store.dto.product.ProductResponseDTO;
 import com.store.entity.Product;
 import com.store.exception.product.ProductAlreadyExistsException;
 import com.store.exception.product.ProductNotFoundException;
+import com.store.mapper.ProductMapper;
 import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,22 +19,19 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    private final ProductMapper productMapper;
+
     @Autowired
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
         this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
     public ProductResponseDTO getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found"));
 
-        return new ProductResponseDTO(
-                product.getId(),
-                product.getName(),
-                product.getBrand(),
-                product.getPrice(),
-                product.getStock()
-        );
+        return productMapper.toProductResponse(product);
     }
 
     public List<ProductResponseDTO> getAllProducts() {
