@@ -44,15 +44,10 @@ public class ProductService {
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
 
         for(Product product : products) {
-            ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                    product.getId(),
-                    product.getName(),
-                    product.getBrand(),
-                    product.getPrice(),
-                    product.getStock()
-            );
+            ProductResponseDTO productResponseDTO = productMapper.toProductResponse(product);
             productResponseDTOList.add(productResponseDTO);
         }
+
         return productResponseDTOList;
     }
 

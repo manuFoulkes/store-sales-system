@@ -88,33 +88,25 @@ public class ProductServiceTest {
 
     @Test
     void getAllProducts_ShouldReturnAListOfProducts_IfCustomersExist() {
-        List<Product> productList = new ArrayList<>();
+        List<Product> productList = List.of(
+                new Product("T-Shirt", "Levis", 50.0, 20),
+                new Product("Jean", "Levis", 65.0, 23)
+        );
 
-        Product product1 = Product.builder()
-                .id(1L)
-                .name("T-Shirt")
-                .brand("Levis")
-                .price(50.0)
-                .stock(20)
-                .build();
-
-        Product product2 = Product.builder()
-                .id(2L)
-                .name("Jean")
-                .brand("Levis")
-                .price(65.0)
-                .stock(23)
-                .build();
-
-        productList.add(product1);
-        productList.add(product2);
+        List<ProductResponseDTO> expectedResponse = List.of(
+                new ProductResponseDTO(1L, "T-Shirt", "Levis", 50.0, 20),
+                new ProductResponseDTO(2L,"Jean", "Levis", 65.0, 23)
+        );
 
         when(productRepository.findAll()).thenReturn(productList);
+        when(productMapper.toProductResponse(productList.get(0))).thenReturn(expectedResponse.get(0));
+        when(productMapper.toProductResponse(productList.get(1))).thenReturn(expectedResponse.get(1));
 
-        List<ProductResponseDTO> productResponseDTOList = productService.getAllProducts();
+        List<ProductResponseDTO> actualResponse = productService.getAllProducts();
 
-        assertEquals(productResponseDTOList.get(0).name(), productList.get(0).getName());
-        assertEquals(productResponseDTOList.get(1).name(), productList.get(1).getName());
+        assertEquals(expectedResponse.size(), actualResponse.size());
+        assertEquals(expectedResponse.get(0).name(), actualResponse.get(0).name());
+        assertEquals(expectedResponse.get(1).name(), actualResponse.get(1).name());
     }
 
     @Test

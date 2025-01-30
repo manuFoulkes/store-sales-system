@@ -40,6 +40,6 @@ public class Product {
         this.name = name;
         this.brand = brand;
         this.price = price;
-        this.stock = stock
+        this.stock = stock;
     }
 }
