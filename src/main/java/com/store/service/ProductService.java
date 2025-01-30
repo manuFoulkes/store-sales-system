@@ -37,13 +37,13 @@ public class ProductService {
     public List<ProductResponseDTO> getAllProducts() {
         List<Product> products = productRepository.findAll();
 
-        if(products.isEmpty()) {
+        if (products.isEmpty()) {
             throw new ProductNotFoundException("Products not found");
         }
 
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
 
-        for(Product product : products) {
+        for (Product product : products) {
             ProductResponseDTO productResponseDTO = productMapper.toProductResponse(product);
             productResponseDTOList.add(productResponseDTO);
         }
@@ -52,32 +52,21 @@ public class ProductService {
     }
 
     public ProductResponseDTO createNewProduct(ProductRequestDTO productRequestDTO) {
-       Optional<Product> existingProduct = productRepository.findByNameAndBrand(
-               productRequestDTO.name(),
-               productRequestDTO.brand()
-       );
+        Optional<Product> existingProduct = productRepository.findByNameAndBrand(
+                productRequestDTO.name(),
+                productRequestDTO.brand()
+        );
 
-       if(existingProduct.isPresent()) {
-           throw new ProductAlreadyExistsException("Product with name " + productRequestDTO.name() +
-                                                    "and brand " + productRequestDTO.brand() + " already exists");
-       }
+        if (existingProduct.isPresent()) {
+            throw new ProductAlreadyExistsException("Product with name " + productRequestDTO.name() +
+                    "and brand " + productRequestDTO.brand() + " already exists");
+        }
 
-       Product product = Product.builder()
-               .name(productRequestDTO.name())
-               .brand(productRequestDTO.brand())
-               .price(productRequestDTO.price())
-               .stock(productRequestDTO.stock())
-               .build();
+        Product product = productMapper.toProduct(productRequestDTO);
 
-       product = productRepository.save(product);
+        product = productRepository.save(product);
 
-       return new ProductResponseDTO(
-               product.getId(),
-               product.getName(),
-               product.getBrand(),
-               product.getPrice(),
-               product.getStock()
-       );
+        return productMapper.toProductResponse(product);
     }
 
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {

@@ -136,13 +136,26 @@ public class ProductServiceTest {
                 20
         );
 
+        ProductResponseDTO expectedResponse = new ProductResponseDTO(
+                1L,
+                "T-Shirt",
+                "Levis",
+                50.0,
+                20
+        );
+
+        when(productMapper.toProduct(productRequestDTO)).thenReturn(product);
         when(productRepository.save(product)).thenReturn(product);
+        when(productMapper.toProductResponse(product)).thenReturn(expectedResponse);
 
-        ProductResponseDTO productResponseDTO = productService.createNewProduct(productRequestDTO);
+        ProductResponseDTO actualResponse = productService.createNewProduct(productRequestDTO);
 
-        assertEquals(productRequestDTO.name(), productResponseDTO.name());
-        assertEquals(productRequestDTO.brand(), productResponseDTO.brand());
-        assertEquals(productRequestDTO.price(), productResponseDTO.price());
+        assertEquals(expectedResponse.name(), actualResponse.name());
+        assertEquals(expectedResponse.brand(), actualResponse.brand());
+        assertEquals(expectedResponse.price(), actualResponse.price());
+
+        verify(productMapper).toProduct(productRequestDTO);
+        verify(productMapper).toProductResponse(product);
     }
 
     @Test
