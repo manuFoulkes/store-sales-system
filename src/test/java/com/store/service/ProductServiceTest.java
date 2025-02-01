@@ -150,6 +150,7 @@ public class ProductServiceTest {
 
         ProductResponseDTO actualResponse = productService.createNewProduct(productRequestDTO);
 
+        assertEquals(expectedResponse.id(), actualResponse.id());
         assertEquals(expectedResponse.name(), actualResponse.name());
         assertEquals(expectedResponse.brand(), actualResponse.brand());
         assertEquals(expectedResponse.price(), actualResponse.price());
@@ -199,14 +200,26 @@ public class ProductServiceTest {
                 20
         );
 
+        ProductResponseDTO expectedResponse = new ProductResponseDTO(
+                1L,
+                "T-Shirt",
+                "Levis",
+                50.0,
+                20
+        );
+
         when(productRepository.findById(anyLong())).thenReturn(Optional.of(existingProduct));
+        when(productMapper.toProduct(productRequestDTO)).thenReturn(existingProduct);
         when(productRepository.save(existingProduct)).thenReturn(existingProduct);
+        when(productMapper.toProductResponse(existingProduct)).thenReturn(expectedResponse);
 
-        ProductResponseDTO updatedProduct = productService.updateProduct(1L,productRequestDTO);
+        ProductResponseDTO actualResponse = productService.updateProduct(1L,productRequestDTO);
 
-        assertEquals(updatedProduct.name(), productRequestDTO.name());
-        assertEquals(updatedProduct.brand(), productRequestDTO.brand());
-        assertEquals(updatedProduct.price(), productRequestDTO.price());
+        assertEquals(expectedResponse.id(), actualResponse.id());
+        assertEquals(expectedResponse.name(), actualResponse.name());
+        assertEquals(expectedResponse.brand(), actualResponse.brand());
+        assertEquals(expectedResponse.price(), actualResponse.price());
+        assertEquals(expectedResponse.stock(), actualResponse.stock());
     }
 
     @Test

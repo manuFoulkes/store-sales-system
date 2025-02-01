@@ -4,6 +4,8 @@ import com.store.dto.product.ProductRequestDTO;
 import com.store.dto.product.ProductResponseDTO;
 import com.store.entity.Product;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
@@ -11,4 +13,7 @@ public interface ProductMapper {
     ProductResponseDTO toProductResponse(Product product);
 
     Product toProduct(ProductRequestDTO productRequest);
+
+    @Mapping(target = "id", source = "id")
+    void updateProductFromDTO(ProductRequestDTO productRequestDTO, @MappingTarget Product product);
 }
