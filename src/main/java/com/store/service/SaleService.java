@@ -16,6 +16,7 @@ import com.store.exception.product.ProductNotFoundException;
 import com.store.exception.sale.InvalidSaleStateException;
 import com.store.exception.sale.MaxSalesPerDayException;
 import com.store.exception.sale.SaleNotFoundException;
+import com.store.mapper.CustomerMapper;
 import com.store.repository.CustomerRepository;
 import com.store.repository.ProductRepository;
 import com.store.repository.SaleRepository;
@@ -33,12 +34,19 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final CustomerMapper customerMapper;
 
     @Autowired
-    public SaleService(SaleRepository saleRepository, CustomerRepository customerRepository, ProductRepository productRepository) {
+    public SaleService(
+            SaleRepository saleRepository,
+            CustomerRepository customerRepository,
+            ProductRepository productRepository,
+            CustomerMapper customerMapper
+    ) {
         this.saleRepository = saleRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
+        this.customerMapper = customerMapper;
     }
 
     // TODO: Implement MapStruct
@@ -46,7 +54,8 @@ public class SaleService {
         Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new SaleNotFoundException("Sale with id " + id + " does not exists"));
 
-        CustomerResponseDTO customerResponseDTO = getCustomerResponseDTO(sale);
+        //CustomerResponseDTO customerResponseDTO = getCustomerResponseDTO(sale);
+        CustomerResponseDTO customerResponseDTO = customerMapper.toCustomerResponse(sale.getCustomer());
 
         List<SaleDetailResponseDTO> saleDetailsResponse = getSaleDetailResponseDTOS(sale);
 
