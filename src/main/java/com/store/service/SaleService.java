@@ -68,24 +68,6 @@ public class SaleService {
         List<Sale> saleList = saleRepository.findAll();
 
         return saleMapper.toSaleResponseList(saleList);
-        /*
-        List<SaleResponseDTO> saleResponseDTOList = new ArrayList<>();
-
-        for(Sale sale : saleList) {
-            SaleResponseDTO saleResponseDTO = new SaleResponseDTO(
-                    sale.getId(),
-                    sale.getSaleDate(),
-                    sale.getTotalAmount(),
-                    getCustomerResponseDTO(sale),
-                    getSaleDetailResponseDTOS(sale),
-                    sale.getStatus()
-            );
-            saleResponseDTOList.add(saleResponseDTO);
-        }
-
-        return saleResponseDTOList;
-
-         */
     }
 
     public SaleResponseDTO createNewSale(SaleRequestDTO saleRequest) {
@@ -140,7 +122,7 @@ public class SaleService {
         }
 
         newSale = saleRepository.save(newSale);
-
+        /*
         CustomerResponseDTO customerResponseDTO = getCustomerResponseDTO(newSale);
         List<SaleDetailResponseDTO> detailResponseDTOS = getSaleDetailResponseDTOS(newSale);
 
@@ -152,6 +134,9 @@ public class SaleService {
                 detailResponseDTOS,
                 newSale.getStatus()
         );
+         */
+
+        return saleMapper.toSaleResponse(newSale);
     }
 
     public SaleResponseDTO cancelSale(Long id) {
