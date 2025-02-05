@@ -14,5 +14,5 @@ public record SaleResponseDTO(
         BigDecimal totalAmount,
         CustomerResponseDTO customer,
         List<SaleDetailResponseDTO> saleDetails,
-        SaleStatus saleStatus
+        SaleStatus status
 ) {}
