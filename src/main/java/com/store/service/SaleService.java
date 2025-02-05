@@ -56,7 +56,7 @@ public class SaleService {
         this.saleDetailMapper = saleDetailMapper;
         this.saleMapper = saleMapper;
     }
-    
+
     public SaleResponseDTO getSaleById(Long id) {
         Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new SaleNotFoundException("Sale with id " + id + " does not exists"));
@@ -66,6 +66,9 @@ public class SaleService {
 
     public List<SaleResponseDTO> getAllSales() {
         List<Sale> saleList = saleRepository.findAll();
+
+        return saleMapper.toSaleResponseList(saleList);
+        /*
         List<SaleResponseDTO> saleResponseDTOList = new ArrayList<>();
 
         for(Sale sale : saleList) {
@@ -81,6 +84,8 @@ public class SaleService {
         }
 
         return saleResponseDTOList;
+
+         */
     }
 
     public SaleResponseDTO createNewSale(SaleRequestDTO saleRequest) {
