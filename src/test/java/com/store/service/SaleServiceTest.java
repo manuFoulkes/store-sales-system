@@ -415,14 +415,13 @@ public class SaleServiceTest {
                 .stock(15)
                 .build();
 
-        List<SaleDetail> saleDetails = new ArrayList<>();
-        SaleDetail saleDetail1 = SaleDetail.builder()
+        SaleDetail saleDetail = SaleDetail.builder()
                 .product(product)
                 .quantity(1)
                 .price(BigDecimal.valueOf(6000))
                 .build();
-        saleDetails.add(saleDetail1);
 
+        List<SaleDetail> saleDetails = List.of(saleDetail);
 
         Sale sale = Sale.builder()
                 .id(existingSaleId)
@@ -432,11 +431,28 @@ public class SaleServiceTest {
                 .saleDetails(saleDetails)
                 .build();
 
+        SaleResponseDTO expectedResponse = new SaleResponseDTO(
+                sale.getId(),
+                sale.getSaleDate(),
+                sale.getTotalAmount(),
+                new CustomerResponseDTO(customer.getId(),
+                        customer.getName(),
+                        customer.getLastName(),
+                        customer.getEmail()),
+                List.of(new SaleDetailResponseDTO(product.getId(),
+                        product.getName(),
+                        saleDetail.getQuantity(),
+                        saleDetail.getPrice())),
+                SaleStatus.CANCELED
+        );
+
         when(saleRepository.findById(existingSaleId)).thenReturn(Optional.of(sale));
+        when(saleMapper.toSaleResponse(sale)).thenReturn(expectedResponse);
 
-        SaleResponseDTO saleResponse = saleService.cancelSale(existingSaleId);
+        SaleResponseDTO actualResponse = saleService.cancelSale(existingSaleId);
 
-        assertEquals(SaleStatus.CANCELED, saleResponse.status());
+        assertEquals(SaleStatus.CANCELED, actualResponse.status());
+        assertEquals(16, product.getStock());
     }
 
     @Test

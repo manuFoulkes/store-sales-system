@@ -122,19 +122,6 @@ public class SaleService {
         }
 
         newSale = saleRepository.save(newSale);
-        /*
-        CustomerResponseDTO customerResponseDTO = getCustomerResponseDTO(newSale);
-        List<SaleDetailResponseDTO> detailResponseDTOS = getSaleDetailResponseDTOS(newSale);
-
-        return new SaleResponseDTO(
-                newSale.getId(),
-                newSale.getSaleDate(),
-                newSale.getTotalAmount(),
-                customerResponseDTO,
-                detailResponseDTOS,
-                newSale.getStatus()
-        );
-         */
 
         return saleMapper.toSaleResponse(newSale);
     }
@@ -157,46 +144,6 @@ public class SaleService {
 
         saleRepository.save(sale);
 
-        List<SaleDetailResponseDTO> detailsResponse = getSaleDetailResponseDTOS(sale);
-
-        CustomerResponseDTO customerResponse = getCustomerResponseDTO(sale);
-
-        return new SaleResponseDTO(
-                sale.getId(),
-                sale.getSaleDate(),
-                sale.getTotalAmount(),
-                customerResponse,
-                detailsResponse,
-                sale.getStatus()
-        );
-    }
-
-    private CustomerResponseDTO getCustomerResponseDTO(Sale sale) {
-        Customer customer = sale.getCustomer();
-
-        return new CustomerResponseDTO(
-                customer.getId(),
-                customer.getName(),
-                customer.getLastName(),
-                customer.getEmail()
-        );
-    }
-
-    private List<SaleDetailResponseDTO> getSaleDetailResponseDTOS(Sale sale) {
-        List<SaleDetail> saleDetails = sale.getSaleDetails();
-        List<SaleDetailResponseDTO> saleDetailsResponse = new ArrayList<>();
-
-        for(SaleDetail saleDetail : saleDetails) {
-
-            SaleDetailResponseDTO saleDetailResponseDTO = new SaleDetailResponseDTO(
-                    saleDetail.getId(),
-                    saleDetail.getProduct().getName(),
-                    saleDetail.getQuantity(),
-                    saleDetail.getPrice()
-            );
-
-            saleDetailsResponse.add(saleDetailResponseDTO);
-        }
-        return saleDetailsResponse;
+        return saleMapper.toSaleResponse(sale);
     }
 }
