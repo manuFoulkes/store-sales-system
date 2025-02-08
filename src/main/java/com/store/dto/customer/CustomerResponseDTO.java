@@ -5,6 +5,5 @@ public record CustomerResponseDTO(
         String name,
         String lastName,
         String email
-        // List<Sale> saleList; //TODO: check if its necessary
 ) {
 }

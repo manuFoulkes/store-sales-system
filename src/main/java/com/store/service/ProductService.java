@@ -5,6 +5,7 @@ import com.store.dto.product.ProductResponseDTO;
 import com.store.entity.Product;
 import com.store.exception.product.ProductAlreadyExistsException;
 import com.store.exception.product.ProductNotFoundException;
+import com.store.mapper.ProductMapper;
 import com.store.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,93 +19,65 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    private final ProductMapper productMapper;
+
     @Autowired
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
         this.productRepository = productRepository;
+        this.productMapper = productMapper;
     }
 
     public ProductResponseDTO getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found"));
 
-        return new ProductResponseDTO(
-                product.getId(),
-                product.getName(),
-                product.getBrand(),
-                product.getPrice(),
-                product.getStock()
-        );
+        return productMapper.toProductResponse(product);
     }
 
     public List<ProductResponseDTO> getAllProducts() {
         List<Product> products = productRepository.findAll();
 
-        if(products.isEmpty()) {
+        if (products.isEmpty()) {
             throw new ProductNotFoundException("Products not found");
         }
 
         List<ProductResponseDTO> productResponseDTOList = new ArrayList<>();
 
-        for(Product product : products) {
-            ProductResponseDTO productResponseDTO = new ProductResponseDTO(
-                    product.getId(),
-                    product.getName(),
-                    product.getBrand(),
-                    product.getPrice(),
-                    product.getStock()
-            );
+        for (Product product : products) {
+            ProductResponseDTO productResponseDTO = productMapper.toProductResponse(product);
             productResponseDTOList.add(productResponseDTO);
         }
+
         return productResponseDTOList;
     }
 
     public ProductResponseDTO createNewProduct(ProductRequestDTO productRequestDTO) {
-       Optional<Product> existingProduct = productRepository.findByNameAndBrand(
-               productRequestDTO.name(),
-               productRequestDTO.brand()
-       );
+        Optional<Product> existingProduct = productRepository.findByNameAndBrand(
+                productRequestDTO.name(),
+                productRequestDTO.brand()
+        );
 
-       if(existingProduct.isPresent()) {
-           throw new ProductAlreadyExistsException("Product with name " + productRequestDTO.name() +
-                                                    "and brand " + productRequestDTO.brand() + " already exists");
-       }
+        if (existingProduct.isPresent()) {
+            throw new ProductAlreadyExistsException("Product with name " + productRequestDTO.name() +
+                    "and brand " + productRequestDTO.brand() + " already exists");
+        }
 
-       Product product = Product.builder()
-               .name(productRequestDTO.name())
-               .brand(productRequestDTO.brand())
-               .price(productRequestDTO.price())
-               .stock(productRequestDTO.stock())
-               .build();
+        Product product = productMapper.toProduct(productRequestDTO);
 
-       product = productRepository.save(product);
+        product = productRepository.save(product);
 
-       return new ProductResponseDTO(
-               product.getId(),
-               product.getName(),
-               product.getBrand(),
-               product.getPrice(),
-               product.getStock()
-       );
+        return productMapper.toProductResponse(product);
     }
 
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " does not exists"));
 
-        product.setName(productRequestDTO.name());
-        product.setBrand(productRequestDTO.brand());
-        product.setPrice(productRequestDTO.price());
-        product.setStock(productRequestDTO.stock());
+        productMapper.updateProductFromDTO(productRequestDTO, product);
 
         product = productRepository.save(product);
 
-        return new ProductResponseDTO(
-                product.getId(),
-                product.getName(),
-                product.getBrand(),
-                product.getPrice(),
-                product.getStock()
-        );
+        return productMapper.toProductResponse(product);
     }
 
     public void deleteProduct(Long id) {

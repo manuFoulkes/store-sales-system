@@ -5,6 +5,7 @@ import com.store.entity.Customer;
 import com.store.dto.customer.CustomerResponseDTO;
 import com.store.exception.customer.CustomerAlreadyExistsException;
 import com.store.exception.customer.CustomerNotFoundException;
+import com.store.mapper.CustomerMapper;
 import com.store.repository.CustomerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,22 +18,19 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, CustomerMapper customerMapper) {
         this.customerRepository = customerRepository;
+        this.customerMapper = customerMapper;
     }
 
     public CustomerResponseDTO getCustomerById(Long id) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer with id " + id + " not found"));
 
-        return new CustomerResponseDTO(
-                customer.getId(),
-                customer.getName(),
-                customer.getLastName(),
-                customer.getEmail()
-        );
+        return customerMapper.toCustomerResponse(customer);
     }
 
     public List<CustomerResponseDTO> getAllCustomers() {
@@ -45,13 +43,7 @@ public class CustomerService {
         List<CustomerResponseDTO> customersResponse = new ArrayList<>();
 
         for(Customer customer : customers) {
-            CustomerResponseDTO customerResponse = new CustomerResponseDTO(
-                    customer.getId(),
-                    customer.getName(),
-                    customer.getLastName(),
-                    customer.getEmail()
-            );
-
+            CustomerResponseDTO customerResponse = customerMapper.toCustomerResponse(customer);
             customersResponse.add(customerResponse);
         }
 
@@ -71,12 +63,7 @@ public class CustomerService {
 
         customer = customerRepository.save(customer);
 
-        return new CustomerResponseDTO(
-                customer.getId(),
-                customer.getName(),
-                customer.getLastName(),
-                customer.getEmail()
-        );
+        return customerMapper.toCustomerResponse(customer);
     }
 
     @Transactional
@@ -90,12 +77,7 @@ public class CustomerService {
 
         customerRepository.save(customer);
 
-        return new CustomerResponseDTO(
-                customer.getId(),
-                customer.getName(),
-                customer.getLastName(),
-                customer.getEmail()
-        );
+        return customerMapper.toCustomerResponse(customer);
     }
 
     public void deleteCustomer(Long id) {

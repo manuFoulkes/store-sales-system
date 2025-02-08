@@ -16,6 +16,9 @@ import com.store.exception.product.ProductNotFoundException;
 import com.store.exception.sale.InvalidSaleStateException;
 import com.store.exception.sale.MaxSalesPerDayException;
 import com.store.exception.sale.SaleNotFoundException;
+import com.store.mapper.CustomerMapper;
+import com.store.mapper.SaleDetailMapper;
+import com.store.mapper.SaleMapper;
 import com.store.repository.CustomerRepository;
 import com.store.repository.ProductRepository;
 import com.store.repository.SaleRepository;
@@ -33,50 +36,38 @@ public class SaleService {
     private final SaleRepository saleRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
+    private final CustomerMapper customerMapper;
+    private final SaleDetailMapper saleDetailMapper;
+    private final SaleMapper saleMapper;
 
     @Autowired
-    public SaleService(SaleRepository saleRepository, CustomerRepository customerRepository, ProductRepository productRepository) {
+    public SaleService(
+            SaleRepository saleRepository,
+            CustomerRepository customerRepository,
+            ProductRepository productRepository,
+            CustomerMapper customerMapper,
+            SaleDetailMapper saleDetailMapper,
+            SaleMapper saleMapper
+    ) {
         this.saleRepository = saleRepository;
         this.customerRepository = customerRepository;
         this.productRepository = productRepository;
+        this.customerMapper = customerMapper;
+        this.saleDetailMapper = saleDetailMapper;
+        this.saleMapper = saleMapper;
     }
 
-    // TODO: Implement MapStruct
     public SaleResponseDTO getSaleById(Long id) {
         Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new SaleNotFoundException("Sale with id " + id + " does not exists"));
 
-        CustomerResponseDTO customerResponseDTO = getCustomerResponseDTO(sale);
-
-        List<SaleDetailResponseDTO> saleDetailsResponse = getSaleDetailResponseDTOS(sale);
-
-        return new SaleResponseDTO(
-                sale.getId(),
-                sale.getSaleDate(),
-                sale.getTotalAmount(),
-                customerResponseDTO,
-                saleDetailsResponse,
-                sale.getStatus()
-        );
+        return saleMapper.toSaleResponse(sale);
     }
 
     public List<SaleResponseDTO> getAllSales() {
         List<Sale> saleList = saleRepository.findAll();
-        List<SaleResponseDTO> saleResponseDTOList = new ArrayList<>();
 
-        for(Sale sale : saleList) {
-            SaleResponseDTO saleResponseDTO = new SaleResponseDTO(
-                    sale.getId(),
-                    sale.getSaleDate(),
-                    sale.getTotalAmount(),
-                    getCustomerResponseDTO(sale),
-                    getSaleDetailResponseDTOS(sale),
-                    sale.getStatus()
-            );
-            saleResponseDTOList.add(saleResponseDTO);
-        }
-
-        return saleResponseDTOList;
+        return saleMapper.toSaleResponseList(saleList);
     }
 
     public SaleResponseDTO createNewSale(SaleRequestDTO saleRequest) {
@@ -132,17 +123,7 @@ public class SaleService {
 
         newSale = saleRepository.save(newSale);
 
-        CustomerResponseDTO customerResponseDTO = getCustomerResponseDTO(newSale);
-        List<SaleDetailResponseDTO> detailResponseDTOS = getSaleDetailResponseDTOS(newSale);
-
-        return new SaleResponseDTO(
-                newSale.getId(),
-                newSale.getSaleDate(),
-                newSale.getTotalAmount(),
-                customerResponseDTO,
-                detailResponseDTOS,
-                newSale.getStatus()
-        );
+        return saleMapper.toSaleResponse(newSale);
     }
 
     public SaleResponseDTO cancelSale(Long id) {
@@ -163,45 +144,6 @@ public class SaleService {
 
         saleRepository.save(sale);
 
-        List<SaleDetailResponseDTO> detailsResponse = getSaleDetailResponseDTOS(sale);
-
-        CustomerResponseDTO customerResponse = getCustomerResponseDTO(sale);
-
-        return new SaleResponseDTO(
-                sale.getId(),
-                sale.getSaleDate(),
-                sale.getTotalAmount(),
-                customerResponse,
-                detailsResponse,
-                sale.getStatus()
-        );
-    }
-
-    private CustomerResponseDTO getCustomerResponseDTO(Sale sale) {
-        Customer customer = sale.getCustomer();
-
-        return new CustomerResponseDTO(
-                customer.getId(),
-                customer.getName(),
-                customer.getLastName(),
-                customer.getEmail()
-        );
-    }
-
-    private List<SaleDetailResponseDTO> getSaleDetailResponseDTOS(Sale sale) {
-        List<SaleDetail> saleDetails = sale.getSaleDetails();
-        List<SaleDetailResponseDTO> saleDetailsResponse = new ArrayList<>();
-
-        for(SaleDetail saleDetail : saleDetails) {
-            SaleDetailResponseDTO saleDetailResponseDTO = new SaleDetailResponseDTO(
-                    saleDetail.getId(),
-                    saleDetail.getProduct().getName(),
-                    saleDetail.getQuantity(),
-                    saleDetail.getPrice()
-            );
-
-            saleDetailsResponse.add(saleDetailResponseDTO);
-        }
-        return saleDetailsResponse;
+        return saleMapper.toSaleResponse(sale);
     }
 }

@@ -1,8 +1,10 @@
 package com.store.service;
 
+import com.store.dto.customer.CustomerResponseDTO;
 import com.store.dto.sale.SaleRequestDTO;
 import com.store.dto.sale.SaleResponseDTO;
 import com.store.dto.saleDetail.SaleDetailRequestDTO;
+import com.store.dto.saleDetail.SaleDetailResponseDTO;
 import com.store.entity.Customer;
 import com.store.entity.Product;
 import com.store.entity.Sale;
@@ -14,6 +16,7 @@ import com.store.exception.product.ProductNotFoundException;
 import com.store.exception.sale.InvalidSaleStateException;
 import com.store.exception.sale.MaxSalesPerDayException;
 import com.store.exception.sale.SaleNotFoundException;
+import com.store.mapper.SaleMapper;
 import com.store.repository.CustomerRepository;
 import com.store.repository.ProductRepository;
 import com.store.repository.SaleRepository;
@@ -43,6 +46,9 @@ public class SaleServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private SaleMapper saleMapper;
 
     @InjectMocks
     private SaleService saleService;
@@ -79,22 +85,48 @@ public class SaleServiceTest {
         saleDetails.add(saleDetail1);
 
         Sale sale = Sale.builder()
-                .id(1L)
+                .id(existingSaleId)
                 .saleDate(LocalDate.now())
                 .totalAmount(BigDecimal.valueOf(6000))
                 .customer(customer)
                 .saleDetails(saleDetails)
                 .build();
 
+        CustomerResponseDTO customerResponseDTO = new CustomerResponseDTO(
+                customer.getId(),
+                customer.getName(),
+                customer.getLastName(),
+                customer.getEmail()
+        );
+
+        SaleDetailResponseDTO saleDetailResponseDTO = new SaleDetailResponseDTO(
+                product.getId(),
+                product.getName(),
+                saleDetail1.getQuantity(),
+                saleDetail1.getPrice()
+        );
+
+        SaleResponseDTO expectedResponse = new SaleResponseDTO(
+                sale.getId(),
+                sale.getSaleDate(),
+                sale.getTotalAmount(),
+                customerResponseDTO,
+                List.of(saleDetailResponseDTO),
+                sale.getStatus()
+        );
+
+
         when(saleRepository.findById(existingSaleId)).thenReturn(Optional.of(sale));
+        when(saleMapper.toSaleResponse(sale)).thenReturn(expectedResponse);
 
-        SaleResponseDTO saleResponseDTO = saleService.getSaleById(existingSaleId);
+        SaleResponseDTO actualResponse = saleService.getSaleById(existingSaleId);
 
-        assertEquals(saleResponseDTO.id(), sale.getId());
-        assertEquals(saleResponseDTO.customer().name(), sale.getCustomer().getName());
-        assertEquals(saleResponseDTO.saleDetails().get(0).price(), sale.getSaleDetails().get(0).getPrice());
+        assertEquals(expectedResponse.id(), actualResponse.id());
+        assertEquals(expectedResponse.customer().name(), actualResponse.customer().name());
+        assertEquals(expectedResponse.saleDetails().get(0).price(), actualResponse.saleDetails().get(0).price());
 
         verify(saleRepository).findById(existingSaleId);
+        verify(saleMapper).toSaleResponse(sale);
     }
 
     @Test
@@ -126,33 +158,51 @@ public class SaleServiceTest {
                 .stock(15)
                 .build();
 
-        List<SaleDetail> saleDetails = new ArrayList<>();
-        SaleDetail saleDetail1 = SaleDetail.builder()
+        SaleDetail saleDetail = SaleDetail.builder()
                 .id(1L)
                 .product(product)
                 .quantity(1)
                 .price(BigDecimal.valueOf(6000))
                 .build();
-        saleDetails.add(saleDetail1);
 
         Sale sale = Sale.builder()
                 .id(1L)
                 .saleDate(LocalDate.now())
                 .totalAmount(BigDecimal.valueOf(6000))
                 .customer(customer)
-                .saleDetails(saleDetails)
+                .saleDetails(List.of(saleDetail))
                 .build();
 
-        List<Sale> saleList = new ArrayList<>();
+        List<Sale> saleList = List.of(sale);
 
-        saleList.add(sale);
+        SaleResponseDTO saleResponseDTO = new SaleResponseDTO(
+                sale.getId(),
+                sale.getSaleDate(),
+                sale.getTotalAmount(),
+                new CustomerResponseDTO(customer.getId(),
+                        customer.getName(),
+                        customer.getLastName(),
+                        customer.getEmail()),
+                List.of(new SaleDetailResponseDTO(product.getId(),
+                        product.getName(),
+                        saleDetail.getQuantity(),
+                        saleDetail.getPrice())),
+                SaleStatus.ACTIVE
+        );
+
+        List<SaleResponseDTO> expectedSaleResponseList = List.of(saleResponseDTO);
 
         when(saleRepository.findAll()).thenReturn(saleList);
+        when(saleMapper.toSaleResponseList(saleList)).thenReturn(expectedSaleResponseList);
 
-        List<SaleResponseDTO> saleResponseDTOList = saleService.getAllSales();
+        List<SaleResponseDTO> actualSaleResponseList = saleService.getAllSales();
 
-        assertEquals(saleList.size(), saleResponseDTOList.size());
-        assertEquals(saleList.get(0).getCustomer().getName(), saleResponseDTOList.get(0).customer().name());
+        assertEquals(expectedSaleResponseList.size(), actualSaleResponseList.size());
+        assertEquals(expectedSaleResponseList.get(0).customer().name(), actualSaleResponseList.get(0).customer().name());
+        assertEquals(expectedSaleResponseList.get(0).saleDetails().get(0).productName(), actualSaleResponseList.get(0).saleDetails().get(0).productName());
+
+        verify(saleRepository).findAll();
+        verify(saleMapper).toSaleResponseList(saleList);
     }
 
     @Test
@@ -184,14 +234,14 @@ public class SaleServiceTest {
                 .stock(15)
                 .build();
 
-        List<SaleDetail> saleDetails = new ArrayList<>();
-        SaleDetail saleDetail1 = SaleDetail.builder()
+
+        SaleDetail saleDetail = SaleDetail.builder()
                 .product(product)
                 .quantity(1)
                 .price(BigDecimal.valueOf(6000))
                 .build();
-        saleDetails.add(saleDetail1);
 
+        List<SaleDetail> saleDetails = List.of(saleDetail);
 
         Sale sale = Sale.builder()
                 .saleDate(LocalDate.now())
@@ -200,26 +250,45 @@ public class SaleServiceTest {
                 .saleDetails(saleDetails)
                 .build();
 
-
-        List<SaleDetailRequestDTO> detailsRequest = new ArrayList<>();
         SaleDetailRequestDTO detailRequest = new SaleDetailRequestDTO(1L,
                 1,
                 BigDecimal.valueOf(6000)
         );
 
-        detailsRequest.add(detailRequest);
+        List<SaleDetailRequestDTO> detailsRequest = List.of(detailRequest);
 
         SaleRequestDTO saleRequestDTO = new SaleRequestDTO(1L, detailsRequest);
+
+        SaleResponseDTO expectedResponse = new SaleResponseDTO(
+                sale.getId(),
+                sale.getSaleDate(),
+                sale.getTotalAmount(),
+                new CustomerResponseDTO(customer.getId(),
+                        customer.getName(),
+                        customer.getLastName(),
+                        customer.getEmail()),
+                List.of(new SaleDetailResponseDTO(product.getId(),
+                        product.getName(),
+                        saleDetail.getQuantity(),
+                        saleDetail.getPrice())),
+                SaleStatus.ACTIVE
+        );
 
         when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
         when(saleRepository.save(sale)).thenReturn(sale);
+        when(saleMapper.toSaleResponse(sale)).thenReturn(expectedResponse);
 
-        SaleResponseDTO saleResponseDTO = saleService.createNewSale(saleRequestDTO);
+        SaleResponseDTO actualResponse = saleService.createNewSale(saleRequestDTO);
 
-        assertEquals(saleResponseDTO.totalAmount(), sale.getTotalAmount());
-        assertEquals(saleResponseDTO.customer().name(), sale.getCustomer().getName());
-        assertEquals(saleResponseDTO.saleDetails().get(0).productName(), sale.getSaleDetails().get(0).getProduct().getName());
+        assertEquals(expectedResponse.totalAmount(), actualResponse.totalAmount());
+        assertEquals(expectedResponse.customer().name(), actualResponse.customer().name());
+        assertEquals(expectedResponse.saleDetails().get(0).productName(), actualResponse.saleDetails().get(0).productName());
+
+        verify(customerRepository).findById(customer.getId());
+        verify(productRepository).findById(product.getId());
+        verify(saleRepository).save(sale);
+        verify(saleMapper).toSaleResponse(sale);
     }
 
     @Test
@@ -346,14 +415,13 @@ public class SaleServiceTest {
                 .stock(15)
                 .build();
 
-        List<SaleDetail> saleDetails = new ArrayList<>();
-        SaleDetail saleDetail1 = SaleDetail.builder()
+        SaleDetail saleDetail = SaleDetail.builder()
                 .product(product)
                 .quantity(1)
                 .price(BigDecimal.valueOf(6000))
                 .build();
-        saleDetails.add(saleDetail1);
 
+        List<SaleDetail> saleDetails = List.of(saleDetail);
 
         Sale sale = Sale.builder()
                 .id(existingSaleId)
@@ -363,11 +431,28 @@ public class SaleServiceTest {
                 .saleDetails(saleDetails)
                 .build();
 
+        SaleResponseDTO expectedResponse = new SaleResponseDTO(
+                sale.getId(),
+                sale.getSaleDate(),
+                sale.getTotalAmount(),
+                new CustomerResponseDTO(customer.getId(),
+                        customer.getName(),
+                        customer.getLastName(),
+                        customer.getEmail()),
+                List.of(new SaleDetailResponseDTO(product.getId(),
+                        product.getName(),
+                        saleDetail.getQuantity(),
+                        saleDetail.getPrice())),
+                SaleStatus.CANCELED
+        );
+
         when(saleRepository.findById(existingSaleId)).thenReturn(Optional.of(sale));
+        when(saleMapper.toSaleResponse(sale)).thenReturn(expectedResponse);
 
-        SaleResponseDTO saleResponse = saleService.cancelSale(existingSaleId);
+        SaleResponseDTO actualResponse = saleService.cancelSale(existingSaleId);
 
-        assertEquals(SaleStatus.CANCELED, saleResponse.saleStatus());
+        assertEquals(SaleStatus.CANCELED, actualResponse.status());
+        assertEquals(16, product.getStock());
     }
 
     @Test

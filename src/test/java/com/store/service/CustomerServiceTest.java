@@ -5,6 +5,7 @@ import com.store.dto.customer.CustomerResponseDTO;
 import com.store.entity.Customer;
 import com.store.exception.customer.CustomerAlreadyExistsException;
 import com.store.exception.customer.CustomerNotFoundException;
+import com.store.mapper.CustomerMapper;
 import com.store.repository.CustomerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +27,9 @@ public class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;
+
+    @Mock
+    private CustomerMapper customerMapper;
 
     @InjectMocks
     private CustomerService customerService;
@@ -46,11 +49,25 @@ public class CustomerServiceTest {
                 .email("john.doe@gmail.com")
                 .build();
 
+        CustomerResponseDTO expectedResponse = new CustomerResponseDTO(
+                customerId,
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
         when(customerRepository.findById(customerId)).thenReturn(Optional.of(expectedCustomer));
+        when(customerMapper.toCustomerResponse(expectedCustomer)).thenReturn(expectedResponse);
 
-        CustomerResponseDTO customerResponseDTO = customerService.getCustomerById(customerId);
+        CustomerResponseDTO actualResponse = customerService.getCustomerById(customerId);
 
-        assertEquals(expectedCustomer.getName(), customerResponseDTO.name());
+        assertNotNull(actualResponse);
+        assertEquals(expectedResponse.name(), actualResponse.name());
+        assertEquals(expectedResponse.lastName(), actualResponse.lastName());
+        assertEquals(expectedResponse.email(), actualResponse.email());
+
+        verify(customerRepository).findById(customerId);
+        verify(customerMapper).toCustomerResponse(expectedCustomer);
     }
 
     @Test
@@ -68,20 +85,25 @@ public class CustomerServiceTest {
 
     @Test
     void getAllCustomers_ShouldReturnAListOfCustomers_WhenCustomersExists() {
-        List<Customer> customers = new ArrayList<>();
-        Customer customer1 = new Customer("John", "Doe", "john.doe@gmail.com");
-        Customer customer2 = new Customer("Martin", "Fowler", "m.fowler@gmail.com");
+        List<Customer> customers = List.of(
+                new Customer("John", "Doe", "john.doe@gmail.com"),
+                new Customer("Martin", "Fowler", "m.fowler@gmail.com")
+        );
 
-        customers.add(customer1);
-        customers.add(customer2);
+        List<CustomerResponseDTO> customerResponseDTOS = List.of(
+                new CustomerResponseDTO(1L, "John", "Doe", "john.doe@gmail.com"),
+                new CustomerResponseDTO(2L, "Martin", "Fowler", "m.fowler@gmail.com")
+        );
 
         when(customerRepository.findAll()).thenReturn(customers);
+        when(customerMapper.toCustomerResponse(customers.get(0))).thenReturn(customerResponseDTOS.get(0));
+        when(customerMapper.toCustomerResponse(customers.get(1))).thenReturn(customerResponseDTOS.get(1));
 
-        List<CustomerResponseDTO> customerResponseDTOS = customerService.getAllCustomers();
+        List<CustomerResponseDTO> expectedResponse = customerService.getAllCustomers();
 
         assertEquals(customers.size(), customerResponseDTOS.size());
-        assertEquals(customer1.getName(), customerResponseDTOS.get(0).name());
-        assertEquals(customer2.getName(), customerResponseDTOS.get(1).name());
+        assertEquals(customerResponseDTOS.get(0).name(), expectedResponse.get(0).name());
+        assertEquals(customerResponseDTOS.get(1).name(), expectedResponse.get(1).name());
     }
 
     @Test
@@ -97,16 +119,33 @@ public class CustomerServiceTest {
 
     @Test
     void createCustomer_ShouldSuccess_WhenCustomerDoesNotExist() {
-        Customer customer = new Customer("John", "Doe", "john.doe@gmail.com");
-        CustomerRequestDTO customerRequestDTO = new CustomerRequestDTO("John", "Doe", "john.doe@gmail.com");
+        Customer customer = new Customer(
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
+        CustomerRequestDTO customerRequest = new CustomerRequestDTO(
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
+        CustomerResponseDTO expectedResponse = new CustomerResponseDTO(
+                1L,
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
 
         when(customerRepository.save(customer)).thenReturn(customer);
+        when(customerMapper.toCustomerResponse(customer)).thenReturn(expectedResponse);
 
-        CustomerResponseDTO customerResponseDTO = customerService.createCustomer(customerRequestDTO);
+        CustomerResponseDTO actualResponse = customerService.createCustomer(customerRequest);
 
-        assertEquals(customer.getName(), customerResponseDTO.name());
-        assertEquals(customer.getLastName(), customerResponseDTO.lastName());
-        assertEquals(customer.getEmail(), customerResponseDTO.email());
+        assertEquals(expectedResponse.name(), actualResponse.name());
+        assertEquals(expectedResponse.lastName(), actualResponse.lastName());
+        assertEquals(expectedResponse.email(), actualResponse.email());
     }
 
     @Test
@@ -124,21 +163,34 @@ public class CustomerServiceTest {
 
     @Test
     void updateCustomer_ShouldSuccess_WhenCustomerExists() {
-        Customer existingCustomer = new Customer("John", "Doe", "john.doe@gmail.com");
+        Customer existingCustomer = new Customer(
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
         CustomerRequestDTO customerRequestDTO = new CustomerRequestDTO(
             "John",
             "Doe",
             "john.doe@gmail.com"
         );
 
+        CustomerResponseDTO expectedResponse = new CustomerResponseDTO(
+                1L,
+                "John",
+                "Doe",
+                "john.doe@gmail.com"
+        );
+
         when(customerRepository.findById(anyLong())).thenReturn(Optional.of(existingCustomer));
         when(customerRepository.save(existingCustomer)).thenReturn(existingCustomer);
+        when(customerMapper.toCustomerResponse(existingCustomer)).thenReturn(expectedResponse);
 
-        CustomerResponseDTO updatedCustomer = customerService.updateCustomer(1L, customerRequestDTO);
+        CustomerResponseDTO actualResponse = customerService.updateCustomer(1L, customerRequestDTO);
 
-        assertEquals(updatedCustomer.name(), customerRequestDTO.name());
-        assertEquals(updatedCustomer.lastName(), customerRequestDTO.lastName());
-        assertEquals(updatedCustomer.email(), customerRequestDTO.email());
+        assertEquals(expectedResponse.name(), actualResponse.name());
+        assertEquals(expectedResponse.lastName(), actualResponse.lastName());
+        assertEquals(expectedResponse.email(), actualResponse.email());
     }
 
     @Test
