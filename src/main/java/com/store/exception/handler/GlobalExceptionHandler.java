@@ -1,5 +1,6 @@
 package com.store.exception.handler;
 
+import com.store.exception.customer.CustomerAlreadyExistsException;
 import com.store.exception.model.ApiError;
 import com.store.exception.product.InsufficientStockException;
 import com.store.exception.product.ProductAlreadyExistsException;
@@ -13,6 +14,18 @@ import java.time.Instant;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(CustomerAlreadyExistsException.class)
+    public ResponseEntity<ApiError> customerAlreadyExist(CustomerAlreadyExistsException ex) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "CUSTOMER_ALREADY_EXIST",
+                ex.getMessage(),
+                Instant.now()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler(InsufficientStockException.class)
     public ResponseEntity<ApiError> handleInsufficientStock(InsufficientStockException ex) {
