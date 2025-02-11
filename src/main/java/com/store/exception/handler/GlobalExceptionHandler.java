@@ -7,6 +7,7 @@ import com.store.exception.product.InsufficientStockException;
 import com.store.exception.product.ProductAlreadyExistsException;
 import com.store.exception.product.ProductNotFoundException;
 import com.store.exception.sale.InvalidSaleStateException;
+import com.store.exception.sale.MaxSalesPerDayException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -87,5 +88,17 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MaxSalesPerDayException.class)
+    public ResponseEntity<ApiError> handleMaxSalesPerDay(MaxSalesPerDayException ex) {
+        ApiError error = new ApiError(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "MAX_SALES_EXCEEDED",
+                ex.getMessage(),
+                Instant.now()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }
