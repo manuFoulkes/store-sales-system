@@ -2,6 +2,7 @@ package com.store.exception.handler;
 
 import com.store.exception.model.ApiError;
 import com.store.exception.product.InsufficientStockException;
+import com.store.exception.product.ProductAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,4 +24,18 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(ProductAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleProductAlreadyExist(ProductAlreadyExistsException ex) {
+        ApiError error = new ApiError(
+                HttpStatus.CONTINUE.value(),
+                "PRODUCT_ALREADY_EXIST",
+                ex.getMessage(),
+                Instant.now()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    
 }
