@@ -6,6 +6,7 @@ import com.store.exception.model.ApiError;
 import com.store.exception.product.InsufficientStockException;
 import com.store.exception.product.ProductAlreadyExistsException;
 import com.store.exception.product.ProductNotFoundException;
+import com.store.exception.sale.InvalidSaleStateException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -74,5 +75,17 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidSaleStateException.class)
+    public ResponseEntity<ApiError> handleInvalidSaleState(InvalidSaleStateException ex) {
+        ApiError error= new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "INVALID_SALE_STATE",
+                ex.getMessage(),
+                Instant.now()
+        );
+
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 }
