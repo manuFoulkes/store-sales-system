@@ -8,6 +8,6 @@ public class StoreSalesSystemApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(StoreSalesSystemApplication.class, args);
-		System.out.println("Running from Store-sales system");
+		System.out.println("RUNNING STORE_SALES_SYSTEM");
 	}
 }
