@@ -50,6 +50,7 @@ public class CustomerService {
         return customersResponse;
     }
 
+    @Transactional
     public CustomerResponseDTO createCustomer(CustomerRequestDTO customerRequestDTO) {
         customerRepository.getCustomerByEmail(customerRequestDTO.email())
                 .ifPresent(customer -> {

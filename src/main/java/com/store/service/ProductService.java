@@ -7,6 +7,7 @@ import com.store.exception.product.ProductAlreadyExistsException;
 import com.store.exception.product.ProductNotFoundException;
 import com.store.mapper.ProductMapper;
 import com.store.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,7 @@ public class ProductService {
         return productResponseDTOList;
     }
 
+    @Transactional
     public ProductResponseDTO createNewProduct(ProductRequestDTO productRequestDTO) {
         Optional<Product> existingProduct = productRepository.findByNameAndBrand(
                 productRequestDTO.name(),
@@ -69,6 +71,7 @@ public class ProductService {
         return productMapper.toProductResponse(product);
     }
 
+    @Transactional
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " does not exists"));
