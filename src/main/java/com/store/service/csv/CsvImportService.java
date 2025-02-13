@@ -48,8 +48,8 @@ public class CsvImportService {
                     Product product = new Product(
                             line[0],
                             line[1],
-                            Double.parseDouble(line[3]),
-                            Integer.parseInt(line[4])
+                            Double.parseDouble(line[2]),
+                            Integer.parseInt(line[3])
                     );
                     productList.add(product);
                 } catch(NumberFormatException e) {
