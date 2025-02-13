@@ -22,6 +22,7 @@ import com.store.mapper.SaleMapper;
 import com.store.repository.CustomerRepository;
 import com.store.repository.ProductRepository;
 import com.store.repository.SaleRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +71,7 @@ public class SaleService {
         return saleMapper.toSaleResponseList(saleList);
     }
 
+    @Transactional
     public SaleResponseDTO createNewSale(SaleRequestDTO saleRequest) {
         int maxSalesPerDay = 3;
         Long customerId = saleRequest.customerId();
@@ -126,6 +128,7 @@ public class SaleService {
         return saleMapper.toSaleResponse(newSale);
     }
 
+    @Transactional
     public SaleResponseDTO cancelSale(Long id) {
         Sale sale = saleRepository.findById(id)
                 .orElseThrow(() -> new SaleNotFoundException("Sale with id " + id + " not found"));
