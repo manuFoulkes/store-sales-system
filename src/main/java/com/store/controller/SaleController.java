@@ -28,22 +28,16 @@ public class SaleController {
 
     @GetMapping
     public ResponseEntity<List<SaleResponseDTO>> getAllSales() {
-        List<SaleResponseDTO> saleResponseDTOList = saleService.getAllSales();
-
-        return ResponseEntity.ok(saleResponseDTOList);
+        return new ResponseEntity<>(saleService.getAllSales(), HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<SaleResponseDTO> createNewSale(@RequestBody SaleRequestDTO saleRequestDTO) {
-        SaleResponseDTO newSale = saleService.createNewSale(saleRequestDTO);
-
-        return ResponseEntity.ok(newSale);
+        return new ResponseEntity<>(saleService.createNewSale(saleRequestDTO), HttpStatus.OK);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<SaleResponseDTO> cancelSale(@PathVariable Long id) {
-        SaleResponseDTO cancelSale = saleService.cancelSale(id);
-
-        return ResponseEntity.ok(cancelSale);
+        return new ResponseEntity<>(saleService.cancelSale(id), HttpStatus.OK);
     }
 }
