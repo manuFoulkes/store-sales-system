@@ -30,19 +30,13 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<List<CustomerResponseDTO>> getAllCustomers() {
-        List<CustomerResponseDTO> customers = customerService.getAllCustomers();
-
-        return ResponseEntity.ok(customers);
+        return new ResponseEntity<>(customerService.getAllCustomers(), HttpStatus.OK);
     }
 
     //TODO: Add @Valid annotation in param for validation
     @PostMapping
     public ResponseEntity<CustomerResponseDTO> createCustomer(@RequestBody CustomerRequestDTO customerRequestDTO) {
-        CustomerResponseDTO createdCustomer = customerService.createCustomer(customerRequestDTO);
-
-        return ResponseEntity
-                .created(URI.create("/customers/" + createdCustomer.id()))
-                .body(createdCustomer);
+        return new ResponseEntity<>(customerService.createCustomer(customerRequestDTO), HttpStatus.OK);
     }
 
     //TODO: Add @Valid annotation in param for validation
@@ -51,6 +45,8 @@ public class CustomerController {
         CustomerResponseDTO updatedCustomer = customerService.updateCustomer(id, customerRequest);
 
         return ResponseEntity.ok(updatedCustomer);
+
+        return new ResponseEntity<>(customerService.updateCustomer(id, customerRequest), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
