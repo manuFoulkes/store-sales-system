@@ -29,24 +29,18 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
-        List<ProductResponseDTO> productResponseDTOList = productService.getAllProducts();
-
-        return ResponseEntity.ok(productResponseDTOList);
+        return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 
     //TODO: Add @Valid annotation in param for validation
     @PostMapping
     public ResponseEntity<ProductResponseDTO> createNewProduct(@RequestBody ProductRequestDTO productRequestDTO) {
-        ProductResponseDTO newProduct = productService.createNewProduct(productRequestDTO);
-
-        return ResponseEntity.ok(newProduct);
+        return new ResponseEntity<>(productService.createNewProduct(productRequestDTO), HttpStatus.OK);
     }
 
     @PutMapping("{id}")
     public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO productRequestDTO) {
-        ProductResponseDTO updatedProduct = productService.updateProduct(id, productRequestDTO);
-
-        return ResponseEntity.ok(updatedProduct);
+        return new ResponseEntity<>(productService.updateProduct(id, productRequestDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")
