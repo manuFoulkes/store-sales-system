@@ -42,10 +42,6 @@ public class CustomerController {
     //TODO: Add @Valid annotation in param for validation
     @PutMapping("/{id}")
     public ResponseEntity<CustomerResponseDTO> updateCustomer(@PathVariable Long id, @RequestBody CustomerRequestDTO customerRequest) {
-        CustomerResponseDTO updatedCustomer = customerService.updateCustomer(id, customerRequest);
-
-        return ResponseEntity.ok(updatedCustomer);
-
         return new ResponseEntity<>(customerService.updateCustomer(id, customerRequest), HttpStatus.OK);
     }
 
